@@ -91,6 +91,9 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
+# NOTE: the Neon connection is configured via the DATABASE_URL env var (set in
+# .env locally and in the host's env in prod) and applied below — never hardcode
+# the credential here, since this file is committed to the public repo.
 
 # Allow running quick checks on SQLite without Postgres (USE_SQLITE=true)
 if env_bool("USE_SQLITE", False):
@@ -106,7 +109,7 @@ if _database_url:
     import dj_database_url
 
     DATABASES["default"] = dj_database_url.parse(
-        _database_url, conn_max_age=0, ssl_require=True
+        _database_url, conn_max_age=600, ssl_require=True
     )
 
 AUTH_USER_MODEL = "accounts.User"
