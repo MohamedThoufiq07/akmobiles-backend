@@ -1,0 +1,11 @@
+# Point Pyrefly at the project's virtualenv so third-party packages
+# (django, rest_framework, ...) resolve instead of the global Python 3.14.
+python-interpreter = "venv/Scripts/python.exe"
+
+# Treat the django backend dir as a source root for first-party imports.
+search-path = ["."]
+
+# Django ships no type stubs, so silence "untyped-import" warnings for its
+# modules (django.urls, django.db, ...). We don't use django-stubs here.
+[errors]
+untyped-import = false

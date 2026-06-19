@@ -1,0 +1,1897 @@
+[
+  {
+    "name": "iPhone 15 Pro Max",
+    "brand": "Apple",
+    "category": "Smartphones",
+    "description": "The iPhone 15 Pro Max features a titanium design, A17 Pro chip, 48MP camera system with 5x optical zoom, and USB-C connectivity. Experience the most powerful iPhone ever with an all-day battery life and stunning Super Retina XDR display.",
+    "highlights": [
+      "A17 Pro chip with 6-core GPU",
+      "48MP main camera with 5x optical zoom",
+      "Titanium design — lightest Pro model ever",
+      "USB-C with USB 3 speeds",
+      "Action Button for quick access"
+    ],
+    "specifications": {
+      "processor": "A17 Pro Bionic",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.7\" Super Retina XDR OLED, 2796x1290, 120Hz ProMotion",
+      "camera": "48MP + 12MP + 12MP (5x Telephoto)",
+      "battery": "4441 mAh, 27W Fast Charging",
+      "os": "iOS 17",
+      "connectivity": "5G, Wi-Fi 6E, Bluetooth 5.3, NFC",
+      "weight": "221g",
+      "colors": "Natural Titanium, Blue Titanium, White Titanium, Black Titanium"
+    },
+    "images": [
+      {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
+        "alt": "iPhone 15 Pro Max Front"
+      },
+      {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
+        "alt": "iPhone 15 Pro Max Back"
+      },
+      {
+        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
+        "alt": "iPhone 15 Pro Max Side"
+      }
+    ],
+    "originalPrice": 159900,
+    "offerPrice": 149900,
+    "stock": 15,
+    "isFeatured": true,
+    "numSold": 42,
+    "rating": 4.8,
+    "numReviews": 3,
+    "reviews": []
+  },
+  {
+    "name": "iPhone 15",
+    "brand": "Apple",
+    "category": "Smartphones",
+    "description": "iPhone 15 with Dynamic Island, 48MP camera, A16 Bionic chip, and USB-C. New contoured edge and the superpowered Dynamic Island. Available in 5 stunning colors.",
+    "highlights": [
+      "Dynamic Island",
+      "48MP main camera",
+      "A16 Bionic chip",
+      "USB-C connector",
+      "Ceramic Shield front"
+    ],
+    "specifications": {
+      "processor": "A16 Bionic",
+      "ram": "6 GB",
+      "storage": "128 GB",
+      "display": "6.1\" Super Retina XDR OLED, 2556x1179, 60Hz",
+      "camera": "48MP + 12MP",
+      "battery": "3877 mAh, 20W Fast Charging",
+      "os": "iOS 17",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3, NFC",
+      "weight": "171g",
+      "colors": "Black, Blue, Green, Yellow, Pink"
+    },
+    "images": [
+      {
+        "url": "https://maplestore.in/cdn/shop/files/1_iPhone15_Blue_cc4ed8e3-5247-498f-9793-1a6b208c2e14.png?v=1780314971",
+        "alt": "iPhone 15 Front"
+      },
+      {
+        "url": "https://maplestore.in/cdn/shop/files/1_iPhone15_Blue_cc4ed8e3-5247-498f-9793-1a6b208c2e14.png?v=1780314971",
+        "alt": "iPhone 15 Back"
+      }
+    ],
+    "originalPrice": 79900,
+    "offerPrice": 69900,
+    "stock": 25,
+    "isFeatured": false,
+    "numSold": 65,
+    "rating": 4.6,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "iPhone 14",
+    "brand": "Apple",
+    "category": "Smartphones",
+    "description": "iPhone 14 with an impressive camera, great battery life, and A15 Bionic chip. Emergency SOS via satellite and Crash Detection for extra peace of mind.",
+    "highlights": [
+      "A15 Bionic chip",
+      "12MP dual camera with Photonic Engine",
+      "Emergency SOS via satellite",
+      "Crash Detection",
+      "All-day battery life"
+    ],
+    "specifications": {
+      "processor": "A15 Bionic",
+      "ram": "6 GB",
+      "storage": "128 GB",
+      "display": "6.1\" Super Retina XDR OLED, 2532x1170, 60Hz",
+      "camera": "12MP + 12MP",
+      "battery": "3279 mAh, 20W Fast Charging",
+      "os": "iOS 17",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3, NFC",
+      "weight": "172g",
+      "colors": "Midnight, Starlight, Blue, Purple, Red"
+    },
+    "images": [
+      {
+        "url": "https://grest.in/cdn/shop/files/Frame_3_5.png?v=1775222416&width=3840",
+        "alt": "iPhone 14 Front"
+      },
+      {
+        "url": "https://grest.in/cdn/shop/files/Frame_3_5.png?v=1775222416&width=3840",
+        "alt": "iPhone 14 Back"
+      }
+    ],
+    "originalPrice": 69900,
+    "offerPrice": 58900,
+    "stock": 20,
+    "isFeatured": false,
+    "numSold": 80,
+    "rating": 4.5,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Samsung Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "category": "Smartphones",
+    "description": "Samsung Galaxy S24 Ultra with Galaxy AI, built-in S Pen, 200MP camera, Snapdragon 8 Gen 3 processor, and titanium frame. The ultimate productivity and photography powerhouse.",
+    "highlights": [
+      "Galaxy AI for smart features",
+      "200MP main camera with AI zoom",
+      "Built-in S Pen with Air Actions",
+      "Snapdragon 8 Gen 3 for Galaxy",
+      "Titanium frame, IP68 rated"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 3 for Galaxy",
+      "ram": "12 GB",
+      "storage": "256 GB",
+      "display": "6.8\" QHD+ Dynamic AMOLED 2X, 3120x1440, 120Hz",
+      "camera": "200MP + 12MP + 10MP + 50MP",
+      "battery": "5000 mAh, 45W Fast Charging",
+      "os": "Android 14, One UI 6.1",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.3, UWB",
+      "weight": "232g",
+      "colors": "Titanium Gray, Titanium Black, Titanium Violet, Titanium Yellow"
+    },
+    "images": [
+      {
+        "url": "https://pngdownload.io/wp-content/uploads/2024/02/Samsung-Galaxy-S24-Ultra-Titanium-Violet-Smartphone-transparent-PNG-image-jpg.webp",
+        "alt": "Samsung Galaxy S24 Ultra Front"
+      },
+      {
+        "url": "https://pngdownload.io/wp-content/uploads/2024/02/Samsung-Galaxy-S24-Ultra-Titanium-Violet-Smartphone-transparent-PNG-image-jpg.webp",
+        "alt": "Samsung Galaxy S24 Ultra Back"
+      }
+    ],
+    "originalPrice": 134999,
+    "offerPrice": 124999,
+    "stock": 20,
+    "isFeatured": true,
+    "numSold": 38,
+    "rating": 4.7,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Samsung Galaxy S24",
+    "brand": "Samsung",
+    "category": "Smartphones",
+    "description": "Samsung Galaxy S24 with Galaxy AI, 50MP camera, Exynos 2400 processor, and compact design. A flagship experience in a comfortable size.",
+    "highlights": [
+      "Galaxy AI features",
+      "50MP triple camera",
+      "Exynos 2400 processor",
+      "6.2\" Dynamic AMOLED 2X, 120Hz",
+      "IP68 water resistance"
+    ],
+    "specifications": {
+      "processor": "Exynos 2400",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.2\" FHD+ Dynamic AMOLED 2X, 2340x1080, 120Hz",
+      "camera": "50MP + 12MP + 10MP",
+      "battery": "4000 mAh, 25W Fast Charging",
+      "os": "Android 14, One UI 6.1",
+      "connectivity": "5G, Wi-Fi 6E, Bluetooth 5.3",
+      "weight": "167g",
+      "colors": "Onyx Black, Marble Gray, Amber Yellow, Violet"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80",
+        "alt": "Samsung Galaxy S24 Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80",
+        "alt": "Samsung Galaxy S24 Back"
+      }
+    ],
+    "originalPrice": 79999,
+    "offerPrice": 69999,
+    "stock": 30,
+    "isFeatured": false,
+    "numSold": 52,
+    "rating": 4.5,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Samsung Galaxy A55 5G",
+    "brand": "Samsung",
+    "category": "Smartphones",
+    "description": "Samsung Galaxy A55 5G with Exynos 1480, 50MP OIS camera, and 6.6\" Super AMOLED display. Premium mid-range experience with Samsung Galaxy AI features.",
+    "highlights": [
+      "Exynos 1480 processor",
+      "50MP OIS camera",
+      "5000 mAh with 25W charging",
+      "6.6\" Super AMOLED 120Hz",
+      "4 OS upgrades, 5 years security"
+    ],
+    "specifications": {
+      "processor": "Exynos 1480",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.6\" Super AMOLED, 2340x1080, 120Hz",
+      "camera": "50MP + 12MP + 5MP",
+      "battery": "5000 mAh, 25W Fast Charging",
+      "os": "Android 14, One UI 6.1",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3",
+      "weight": "213g",
+      "colors": "Awesome Iceblue, Awesome Lilac, Awesome Navy"
+    },
+    "images": [
+      {
+        "url": "https://images.samsung.com/is/image/samsung/p6pim/africa_en/sm-a556elvwafb/gallery/africa-en-galaxy-a55-5g-sm-a556-sm-a556elvwafb-540306677?$1164_776_PNG$",
+        "alt": "Samsung Galaxy A55 Front"
+      },
+      {
+        "url": "https://images.samsung.com/is/image/samsung/p6pim/africa_en/sm-a556elvwafb/gallery/africa-en-galaxy-a55-5g-sm-a556-sm-a556elvwafb-540306677?$1164_776_PNG$",
+        "alt": "Samsung Galaxy A55 Back"
+      }
+    ],
+    "originalPrice": 28999,
+    "offerPrice": 24999,
+    "stock": 40,
+    "isFeatured": false,
+    "numSold": 70,
+    "rating": 4.3,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "OnePlus 12",
+    "brand": "OnePlus",
+    "category": "Smartphones",
+    "description": "OnePlus 12 powered by Snapdragon 8 Gen 3, featuring a 50MP Hasselblad camera, 100W SUPERVOOC charging, and a stunning 6.82\" 2K LTPO AMOLED display.",
+    "highlights": [
+      "Snapdragon 8 Gen 3 processor",
+      "50MP Hasselblad camera system",
+      "100W SUPERVOOC fast charging",
+      "6.82\" 2K 120Hz LTPO AMOLED",
+      "5400 mAh battery"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 3",
+      "ram": "12 GB",
+      "storage": "256 GB",
+      "display": "6.82\" 2K LTPO AMOLED, 3168x1440, 120Hz",
+      "camera": "50MP + 48MP + 64MP (Hasselblad)",
+      "battery": "5400 mAh, 100W SUPERVOOC",
+      "os": "Android 14, OxygenOS 14",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.4",
+      "weight": "220g",
+      "colors": "Flowy Emerald, Silky Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "OnePlus 12 Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "OnePlus 12 Back"
+      }
+    ],
+    "originalPrice": 69999,
+    "offerPrice": 64999,
+    "stock": 25,
+    "isFeatured": true,
+    "numSold": 55,
+    "rating": 4.6,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "OnePlus 12R",
+    "brand": "OnePlus",
+    "category": "Smartphones",
+    "description": "OnePlus 12R with Snapdragon 8 Gen 2, 100W SUPERVOOC charging, 50MP Sony IMX890 sensor, and a smooth 120Hz ProXDR display. Flagship performance at a competitive price.",
+    "highlights": [
+      "Snapdragon 8 Gen 2",
+      "50MP Sony IMX890 camera",
+      "100W SUPERVOOC charging",
+      "6.78\" 120Hz ProXDR AMOLED",
+      "5500 mAh battery"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 2",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.78\" ProXDR AMOLED, 2780x1264, 120Hz",
+      "camera": "50MP + 8MP + 2MP",
+      "battery": "5500 mAh, 100W SUPERVOOC",
+      "os": "Android 14, OxygenOS 14",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.3",
+      "weight": "207g",
+      "colors": "Iron Gray, Cool Blue"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
+        "alt": "OnePlus 12R Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
+        "alt": "OnePlus 12R Back"
+      }
+    ],
+    "originalPrice": 39999,
+    "offerPrice": 35999,
+    "stock": 30,
+    "isFeatured": false,
+    "numSold": 48,
+    "rating": 4.4,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Xiaomi 14",
+    "brand": "Xiaomi",
+    "category": "Smartphones",
+    "description": "Xiaomi 14 with Leica optics, Snapdragon 8 Gen 3, and a compact 6.36\" LTPO AMOLED display. Premium flagship experience with Leica Summilux lens and HyperOS.",
+    "highlights": [
+      "Leica Summilux camera system",
+      "Snapdragon 8 Gen 3",
+      "Compact 6.36\" display",
+      "90W HyperCharge",
+      "HyperOS"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 3",
+      "ram": "12 GB",
+      "storage": "256 GB",
+      "display": "6.36\" LTPO AMOLED, 2670x1200, 120Hz",
+      "camera": "50MP + 50MP + 50MP (Leica)",
+      "battery": "4610 mAh, 90W Fast Charging",
+      "os": "Android 14, HyperOS",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.4",
+      "weight": "193g",
+      "colors": "Black, White, Green"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
+        "alt": "Xiaomi 14 Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
+        "alt": "Xiaomi 14 Back"
+      }
+    ],
+    "originalPrice": 69999,
+    "offerPrice": 59999,
+    "stock": 18,
+    "isFeatured": true,
+    "numSold": 30,
+    "rating": 4.5,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Redmi Note 13 Pro+ 5G",
+    "brand": "Xiaomi",
+    "category": "Smartphones",
+    "description": "Redmi Note 13 Pro+ with 200MP camera, Dimensity 7200 Ultra, 120W HyperCharge, and IP68 rating. The best mid-range smartphone with flagship-level camera.",
+    "highlights": [
+      "200MP Samsung HP3 main camera",
+      "MediaTek Dimensity 7200 Ultra",
+      "120W HyperCharge",
+      "IP68 dust/water resistance",
+      "6.67\" 120Hz CrystalRes AMOLED"
+    ],
+    "specifications": {
+      "processor": "MediaTek Dimensity 7200 Ultra",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.67\" CrystalRes AMOLED, 2712x1220, 120Hz",
+      "camera": "200MP + 8MP + 2MP",
+      "battery": "5000 mAh, 120W HyperCharge",
+      "os": "Android 13, MIUI 14",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.2",
+      "weight": "204.5g",
+      "colors": "Midnight Black, Moonlight White, Aurora Purple"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1598965402089-897ce52e8355?w=400&q=80",
+        "alt": "Redmi Note 13 Pro+ Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1598965402089-897ce52e8355?w=400&q=80",
+        "alt": "Redmi Note 13 Pro+ Back"
+      }
+    ],
+    "originalPrice": 32999,
+    "offerPrice": 28999,
+    "stock": 35,
+    "isFeatured": false,
+    "numSold": 85,
+    "rating": 4.5,
+    "numReviews": 3,
+    "reviews": []
+  },
+  {
+    "name": "Redmi 13C",
+    "brand": "Xiaomi",
+    "category": "Smartphones",
+    "description": "Redmi 13C — affordable smartphone with 50MP AI camera, MediaTek Helio G85, and 5000mAh battery. Best budget phone for everyday use.",
+    "highlights": [
+      "MediaTek Helio G85",
+      "50MP AI dual camera",
+      "5000 mAh battery",
+      "6.74\" 90Hz display",
+      "Best under ₹10,000"
+    ],
+    "specifications": {
+      "processor": "MediaTek Helio G85",
+      "ram": "4 GB",
+      "storage": "128 GB",
+      "display": "6.74\" IPS LCD, 1600x720, 90Hz",
+      "camera": "50MP + 0.08MP",
+      "battery": "5000 mAh, 18W Fast Charging",
+      "os": "Android 13, MIUI 14",
+      "connectivity": "4G LTE, Wi-Fi 5, Bluetooth 5.1",
+      "weight": "192g",
+      "colors": "Startrail Silver, Stardust Black, Starshine Green"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&q=80",
+        "alt": "Redmi 13C Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&q=80",
+        "alt": "Redmi 13C Back"
+      }
+    ],
+    "originalPrice": 9999,
+    "offerPrice": 8499,
+    "stock": 60,
+    "isFeatured": false,
+    "numSold": 150,
+    "rating": 4,
+    "numReviews": 3,
+    "reviews": []
+  },
+  {
+    "name": "Vivo X100 Pro",
+    "brand": "Vivo",
+    "category": "Smartphones",
+    "description": "Vivo X100 Pro with ZEISS Apo Telephoto lens, Dimensity 9300 processor, and ZEISS T* coating. Professional-grade photography meets flagship performance.",
+    "highlights": [
+      "ZEISS Apo Floating Telephoto",
+      "MediaTek Dimensity 9300",
+      "100W FlashCharge",
+      "6.78\" LTPO AMOLED",
+      "ZEISS T* coating on all lenses"
+    ],
+    "specifications": {
+      "processor": "MediaTek Dimensity 9300",
+      "ram": "16 GB",
+      "storage": "256 GB",
+      "display": "6.78\" LTPO AMOLED, 2800x1260, 120Hz",
+      "camera": "50MP + 50MP + 50MP (ZEISS)",
+      "battery": "5400 mAh, 100W FlashCharge",
+      "os": "Android 14, Funtouch OS 14",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.4",
+      "weight": "225g",
+      "colors": "Asteroid Black, Stardust Blue"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1622957040803-26a4508d6e3d?w=400&q=80",
+        "alt": "Vivo X100 Pro Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1622957040803-26a4508d6e3d?w=400&q=80",
+        "alt": "Vivo X100 Pro Back"
+      }
+    ],
+    "originalPrice": 89999,
+    "offerPrice": 79999,
+    "stock": 12,
+    "isFeatured": true,
+    "numSold": 22,
+    "rating": 4.5,
+    "numReviews": 1,
+    "reviews": []
+  },
+  {
+    "name": "Vivo V30 Pro",
+    "brand": "Vivo",
+    "category": "Smartphones",
+    "description": "Vivo V30 Pro with ZEISS camera, 50MP aura portrait, Snapdragon 7 Gen 3, and 80W FlashCharge. Premium design with studio-quality portraits.",
+    "highlights": [
+      "50MP ZEISS main camera",
+      "Snapdragon 7 Gen 3",
+      "80W FlashCharge",
+      "6.78\" 120Hz AMOLED",
+      "IP54 dust/water resistance"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 7 Gen 3",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.78\" AMOLED, 2800x1260, 120Hz",
+      "camera": "50MP + 50MP + 8MP (ZEISS)",
+      "battery": "5000 mAh, 80W FlashCharge",
+      "os": "Android 14, Funtouch OS 14",
+      "connectivity": "5G, Wi-Fi 6E, Bluetooth 5.3",
+      "weight": "191g",
+      "colors": "Peacock Green, Classic Black"
+    },
+    "images": [
+      {
+        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1709635464671/567a7babdae995ffb47306d1a22b2b3f.png",
+        "alt": "Vivo V30 Pro Front"
+      },
+      {
+        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1709635464671/567a7babdae995ffb47306d1a22b2b3f.png",
+        "alt": "Vivo V30 Pro Back"
+      }
+    ],
+    "originalPrice": 39999,
+    "offerPrice": 34999,
+    "stock": 25,
+    "isFeatured": false,
+    "numSold": 35,
+    "rating": 4.3,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Vivo T3 5G",
+    "brand": "Vivo",
+    "category": "Smartphones",
+    "description": "Vivo T3 5G with Dimensity 7200, 50MP Sony camera, and 44W FlashCharge. Best 5G smartphone under ₹20,000.",
+    "highlights": [
+      "MediaTek Dimensity 7200",
+      "50MP Sony IMX882 camera",
+      "44W FlashCharge",
+      "6.67\" 120Hz AMOLED",
+      "5000 mAh battery"
+    ],
+    "specifications": {
+      "processor": "MediaTek Dimensity 7200",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.67\" AMOLED, 2400x1080, 120Hz",
+      "camera": "50MP + 2MP",
+      "battery": "5000 mAh, 44W FlashCharge",
+      "os": "Android 14, Funtouch OS 14",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3",
+      "weight": "188g",
+      "colors": "Crystal Flake, Energy Green"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400&q=80",
+        "alt": "Vivo T3 5G Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400&q=80",
+        "alt": "Vivo T3 5G Back"
+      }
+    ],
+    "originalPrice": 19999,
+    "offerPrice": 17499,
+    "stock": 50,
+    "isFeatured": false,
+    "numSold": 95,
+    "rating": 4.2,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Oppo Find X7 Ultra",
+    "brand": "Oppo",
+    "category": "Smartphones",
+    "description": "Oppo Find X7 Ultra with dual periscope cameras by Hasselblad, Snapdragon 8 Gen 3, 100W SUPERVOOC, and 6.82\" LTPO AMOLED. The photography flagship.",
+    "highlights": [
+      "Dual periscope Hasselblad cameras",
+      "Snapdragon 8 Gen 3",
+      "100W SUPERVOOC + 50W wireless",
+      "6.82\" 2K LTPO AMOLED, 120Hz",
+      "IP68 rated"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 3",
+      "ram": "16 GB",
+      "storage": "256 GB",
+      "display": "6.82\" 2K LTPO AMOLED, 3168x1440, 120Hz",
+      "camera": "50MP + 50MP + 50MP + 50MP (Hasselblad)",
+      "battery": "5000 mAh, 100W SUPERVOOC",
+      "os": "Android 14, ColorOS 14",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.4",
+      "weight": "221g",
+      "colors": "Ocean Blue, Hasselblad Brown"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1591815302525-756a9bcc3425?w=400&q=80",
+        "alt": "Oppo Find X7 Ultra Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1591815302525-756a9bcc3425?w=400&q=80",
+        "alt": "Oppo Find X7 Ultra Back"
+      }
+    ],
+    "originalPrice": 89999,
+    "offerPrice": 79999,
+    "stock": 10,
+    "isFeatured": true,
+    "numSold": 15,
+    "rating": 4.6,
+    "numReviews": 1,
+    "reviews": []
+  },
+  {
+    "name": "Oppo Reno 11 Pro",
+    "brand": "Oppo",
+    "category": "Smartphones",
+    "description": "Oppo Reno 11 Pro with MediaTek Dimensity 8200, 50MP Sony IMX890 sensor, and 80W SUPERVOOC charging. Sleek design with powerful camera capabilities.",
+    "highlights": [
+      "MediaTek Dimensity 8200",
+      "50MP Sony IMX890 main camera",
+      "80W SUPERVOOC charging",
+      "6.7\" 120Hz AMOLED curved display",
+      "Ultra-slim design"
+    ],
+    "specifications": {
+      "processor": "MediaTek Dimensity 8200",
+      "ram": "12 GB",
+      "storage": "256 GB",
+      "display": "6.7\" AMOLED, 2412x1080, 120Hz",
+      "camera": "50MP + 8MP + 32MP",
+      "battery": "4600 mAh, 80W SUPERVOOC",
+      "os": "Android 14, ColorOS 14",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3",
+      "weight": "181g",
+      "colors": "Rock Grey, Pearl White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400&q=80",
+        "alt": "Oppo Reno 11 Pro Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400&q=80",
+        "alt": "Oppo Reno 11 Pro Back"
+      }
+    ],
+    "originalPrice": 39999,
+    "offerPrice": 34999,
+    "stock": 30,
+    "isFeatured": false,
+    "numSold": 45,
+    "rating": 4.3,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Realme GT 5 Pro",
+    "brand": "Realme",
+    "category": "Smartphones",
+    "description": "Realme GT 5 Pro with Snapdragon 8 Gen 3, Sony IMX890 camera, and 100W fast charging. Flagship performance at an unbeatable price.",
+    "highlights": [
+      "Snapdragon 8 Gen 3",
+      "Sony IMX890 50MP camera",
+      "100W SUPERVOOC charging",
+      "6.78\" 2K AMOLED, 144Hz",
+      "Next-gen AI features"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8 Gen 3",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.78\" 2K AMOLED, 3168x1440, 144Hz",
+      "camera": "50MP + 8MP + 50MP",
+      "battery": "5400 mAh, 100W SUPERVOOC",
+      "os": "Android 14, Realme UI 5.0",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.4",
+      "weight": "218g",
+      "colors": "Moon White, Mars Orange"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=400&q=80",
+        "alt": "Realme GT 5 Pro Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=400&q=80",
+        "alt": "Realme GT 5 Pro Back"
+      }
+    ],
+    "originalPrice": 37999,
+    "offerPrice": 33999,
+    "stock": 22,
+    "isFeatured": true,
+    "numSold": 60,
+    "rating": 4.4,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Realme 12 Pro+ 5G",
+    "brand": "Realme",
+    "category": "Smartphones",
+    "description": "Realme 12 Pro+ 5G with Sony IMX890 periscope telephoto, Snapdragon 7s Gen 2, and 67W SUPERVOOC. Premium camera experience in mid-range.",
+    "highlights": [
+      "Sony IMX890 + periscope telephoto",
+      "Snapdragon 7s Gen 2",
+      "67W SUPERVOOC",
+      "6.7\" 120Hz curved AMOLED",
+      "Premium Swiss design"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 7s Gen 2",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.7\" curved AMOLED, 2412x1080, 120Hz",
+      "camera": "50MP + 64MP + 8MP",
+      "battery": "5000 mAh, 67W SUPERVOOC",
+      "os": "Android 14, Realme UI 5.0",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.2",
+      "weight": "190g",
+      "colors": "Submarine Blue, Navigator Beige"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
+        "alt": "Realme 12 Pro+ Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
+        "alt": "Realme 12 Pro+ Back"
+      }
+    ],
+    "originalPrice": 27999,
+    "offerPrice": 24999,
+    "stock": 28,
+    "isFeatured": false,
+    "numSold": 40,
+    "rating": 4.3,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Motorola Edge 50 Pro",
+    "brand": "Motorola",
+    "category": "Smartphones",
+    "description": "Motorola Edge 50 Pro with Snapdragon 7 Gen 3, 50MP OIS camera, 125W TurboPower charging, and clean Android experience.",
+    "highlights": [
+      "Snapdragon 7 Gen 3",
+      "50MP + 13MP + 10MP camera",
+      "125W TurboPower charging",
+      "Clean Android experience",
+      "IP68 water resistant"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 7 Gen 3",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.7\" pOLED, 2712x1220, 144Hz",
+      "camera": "50MP + 13MP + 10MP",
+      "battery": "4500 mAh, 125W TurboPower",
+      "os": "Android 14, My UX",
+      "connectivity": "5G, Wi-Fi 6E, Bluetooth 5.4",
+      "weight": "186g",
+      "colors": "Moonlight Pearl, Black Beauty"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1587502537745-84b86da1204f?w=400&q=80",
+        "alt": "Motorola Edge 50 Pro Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1587502537745-84b86da1204f?w=400&q=80",
+        "alt": "Motorola Edge 50 Pro Back"
+      }
+    ],
+    "originalPrice": 35999,
+    "offerPrice": 29999,
+    "stock": 18,
+    "isFeatured": true,
+    "numSold": 28,
+    "rating": 4.3,
+    "numReviews": 1,
+    "reviews": []
+  },
+  {
+    "name": "Moto G84 5G",
+    "brand": "Motorola",
+    "category": "Smartphones",
+    "description": "Moto G84 5G with Snapdragon 695, 50MP OIS camera, stereo speakers with Dolby Atmos, and a 6.55\" pOLED 120Hz display.",
+    "highlights": [
+      "Snapdragon 695",
+      "50MP OIS camera",
+      "Stereo speakers, Dolby Atmos",
+      "6.55\" pOLED 120Hz",
+      "Clean Android 14"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 695",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.55\" pOLED, 2400x1080, 120Hz",
+      "camera": "50MP + 8MP",
+      "battery": "5000 mAh, 33W TurboPower",
+      "os": "Android 14, My UX",
+      "connectivity": "5G, Wi-Fi 5, Bluetooth 5.1",
+      "weight": "168g",
+      "colors": "Marshmallow Blue, Viva Magenta"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1551355738-1875b9b0c524?w=400&q=80",
+        "alt": "Moto G84 Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1551355738-1875b9b0c524?w=400&q=80",
+        "alt": "Moto G84 Back"
+      }
+    ],
+    "originalPrice": 19999,
+    "offerPrice": 16999,
+    "stock": 35,
+    "isFeatured": false,
+    "numSold": 42,
+    "rating": 4.2,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Nothing Phone (2)",
+    "brand": "Nothing",
+    "category": "Smartphones",
+    "description": "Nothing Phone (2) with unique Glyph Interface, Snapdragon 8+ Gen 1, 50MP dual camera, and clean Nothing OS 2.0. A truly unique smartphone experience.",
+    "highlights": [
+      "Unique Glyph Interface lighting",
+      "Snapdragon 8+ Gen 1",
+      "50MP dual camera",
+      "Nothing OS 2.0 (clean Android)",
+      "4700 mAh, 45W charging"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 8+ Gen 1",
+      "ram": "12 GB",
+      "storage": "256 GB",
+      "display": "6.7\" LTPO OLED, 2412x1080, 120Hz",
+      "camera": "50MP + 50MP",
+      "battery": "4700 mAh, 45W Fast Charging",
+      "os": "Android 14, Nothing OS 2.5",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.3, NFC",
+      "weight": "201g",
+      "colors": "White, Dark Gray"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=400&q=80",
+        "alt": "Nothing Phone (2) Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=400&q=80",
+        "alt": "Nothing Phone (2) Back"
+      }
+    ],
+    "originalPrice": 44999,
+    "offerPrice": 38999,
+    "stock": 15,
+    "isFeatured": true,
+    "numSold": 25,
+    "rating": 4.5,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Nothing Phone (2a)",
+    "brand": "Nothing",
+    "category": "Smartphones",
+    "description": "Nothing Phone (2a) with MediaTek Dimensity 7200 Pro, 50MP dual camera, and the signature Glyph Interface. Premium design at mid-range pricing.",
+    "highlights": [
+      "Glyph Interface 2.0",
+      "Dimensity 7200 Pro",
+      "50MP dual camera",
+      "Nothing OS 2.5",
+      "5000 mAh, 45W charging"
+    ],
+    "specifications": {
+      "processor": "MediaTek Dimensity 7200 Pro",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.7\" AMOLED, 2412x1080, 120Hz",
+      "camera": "50MP + 50MP",
+      "battery": "5000 mAh, 45W Fast Charging",
+      "os": "Android 14, Nothing OS 2.5",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.3, NFC",
+      "weight": "190g",
+      "colors": "Black, White, Milk"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "Nothing Phone (2a) Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "Nothing Phone (2a) Back"
+      }
+    ],
+    "originalPrice": 23999,
+    "offerPrice": 21999,
+    "stock": 22,
+    "isFeatured": false,
+    "numSold": 32,
+    "rating": 4.4,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Google Pixel 8 Pro",
+    "brand": "Google",
+    "category": "Smartphones",
+    "description": "Google Pixel 8 Pro with Tensor G3, 50MP triple camera with 5x optical zoom, 7 years of OS updates, and the best AI features powered by Google.",
+    "highlights": [
+      "Google Tensor G3",
+      "50MP + 48MP + 48MP cameras",
+      "7 years of OS and security updates",
+      "Best-in-class AI features",
+      "IP68 rated, Gorilla Glass Victus 2"
+    ],
+    "specifications": {
+      "processor": "Google Tensor G3",
+      "ram": "12 GB",
+      "storage": "128 GB",
+      "display": "6.7\" LTPO OLED, 2992x1344, 120Hz",
+      "camera": "50MP + 48MP + 48MP",
+      "battery": "5050 mAh, 30W Fast Charging",
+      "os": "Android 14, Pixel Experience",
+      "connectivity": "5G, Wi-Fi 7, Bluetooth 5.3, UWB",
+      "weight": "213g",
+      "colors": "Obsidian, Porcelain, Bay"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "Google Pixel 8 Pro Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
+        "alt": "Google Pixel 8 Pro Back"
+      }
+    ],
+    "originalPrice": 106999,
+    "offerPrice": 89999,
+    "stock": 12,
+    "isFeatured": true,
+    "numSold": 18,
+    "rating": 4.7,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Google Pixel 8a",
+    "brand": "Google",
+    "category": "Smartphones",
+    "description": "Google Pixel 8a with Tensor G3 chip, 64MP camera, 7 years of updates, and pure Android experience. The best value Pixel with premium AI features.",
+    "highlights": [
+      "Google Tensor G3",
+      "64MP main camera",
+      "7 years of OS updates",
+      "AI features: Magic Eraser, Photo Unblur",
+      "IP67 rated"
+    ],
+    "specifications": {
+      "processor": "Google Tensor G3",
+      "ram": "8 GB",
+      "storage": "128 GB",
+      "display": "6.1\" OLED, 2400x1080, 120Hz",
+      "camera": "64MP + 13MP",
+      "battery": "4492 mAh, 18W Fast Charging",
+      "os": "Android 14, Pixel Experience",
+      "connectivity": "5G, Wi-Fi 6E, Bluetooth 5.3",
+      "weight": "188g",
+      "colors": "Obsidian, Porcelain, Bay, Aloe"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
+        "alt": "Google Pixel 8a Front"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
+        "alt": "Google Pixel 8a Back"
+      }
+    ],
+    "originalPrice": 52999,
+    "offerPrice": 45999,
+    "stock": 20,
+    "isFeatured": false,
+    "numSold": 28,
+    "rating": 4.5,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Nokia X30 5G",
+    "brand": "Nokia",
+    "category": "Smartphones",
+    "description": "Nokia X30 5G is built with 100% recycled aluminium and 65% recycled plastic. Experience the best of PureView photography with OIS and custom night photography features.",
+    "highlights": [
+      "Built with recycled materials",
+      "50MP PureView camera with OIS",
+      "Snapdragon 695 5G processor",
+      "6.43\" AMOLED 90Hz display",
+      "3 years of security and OS updates"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 695 5G",
+      "ram": "8 GB",
+      "storage": "256 GB",
+      "display": "6.43\" AMOLED, 1080x2400, 90Hz",
+      "camera": "50MP + 13MP",
+      "battery": "4200 mAh, 33W Fast Charging",
+      "os": "Android 12 (upgradable to 14)",
+      "connectivity": "5G, Wi-Fi 6, Bluetooth 5.1, NFC",
+      "weight": "185g",
+      "colors": "Cloudy Blue, Ice White"
+    },
+    "images": [
+      {
+        "url": "https://media-ik.croma.com/prod/https://media.tatacroma.com/Croma%20Assets/Communication/Mobiles/Images/268646_0_ujhaxl.png",
+        "alt": "Nokia X30 5G Front"
+      },
+      {
+        "url": "https://media-ik.croma.com/prod/https://media.tatacroma.com/Croma%20Assets/Communication/Mobiles/Images/268646_0_ujhaxl.png",
+        "alt": "Nokia X30 5G Back"
+      }
+    ],
+    "originalPrice": 48999,
+    "offerPrice": 36999,
+    "stock": 12,
+    "isFeatured": true,
+    "numSold": 18,
+    "rating": 4.3,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Nokia G42 5G",
+    "brand": "Nokia",
+    "category": "Smartphones",
+    "description": "Nokia G42 5G is designed for quick fixability. Replace the screen, battery, or charging port yourself at home. Features clean Android software and 3 days battery life.",
+    "highlights": [
+      "User-repairable QuickFix design",
+      "3-day battery life on a single charge",
+      "50MP triple AI camera",
+      "Snapdragon 480+ 5G processor",
+      "Virtual RAM extension feature"
+    ],
+    "specifications": {
+      "processor": "Snapdragon 480+ 5G",
+      "ram": "6 GB",
+      "storage": "128 GB",
+      "display": "6.56\" IPS LCD, 720x1612, 90Hz",
+      "camera": "50MP + 2MP + 2MP",
+      "battery": "5000 mAh, 20W Fast Charging",
+      "os": "Android 13",
+      "connectivity": "5G, Wi-Fi 5, Bluetooth 5.1",
+      "weight": "193.8g",
+      "colors": "So Purple, So Grey"
+    },
+    "images": [
+      {
+        "url": "https://cdn.beebom.com/mobile/nokia-g42-5g3.png",
+        "alt": "Nokia G42 5G Front"
+      },
+      {
+        "url": "https://cdn.beebom.com/mobile/nokia-g42-5g3.png",
+        "alt": "Nokia G42 5G Back"
+      }
+    ],
+    "originalPrice": 15999,
+    "offerPrice": 12499,
+    "stock": 25,
+    "isFeatured": false,
+    "numSold": 42,
+    "rating": 4.1,
+    "numReviews": 2,
+    "reviews": []
+  },
+  {
+    "name": "Apple Watch Series 9 GPS",
+    "brand": "Apple",
+    "category": "Smart Watches",
+    "description": "The Apple Watch Series 9 features the S9 SiP chip, double tap gesture, a brighter display, and advanced health sensors for ECG, heart rate, sleep, and blood oxygen tracking.",
+    "highlights": [
+      "S9 SiP chip with 4-core Neural Engine",
+      "Double tap gesture control",
+      "Always-On Retina display up to 2000 nits",
+      "ECG app and Blood Oxygen monitoring",
+      "IP6X dust resistant and swimproof design"
+    ],
+    "specifications": {
+      "processor": "S9 SiP",
+      "connectivity": "GPS, Wi-Fi, Bluetooth 5.3, NFC",
+      "battery": "Up to 18 hours (36 hours in Low Power Mode)",
+      "weight": "38.7g",
+      "colors": "Midnight, Starlight, Silver, Red, Pink"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500",
+        "alt": "Apple Watch Series 9"
+      }
+    ],
+    "originalPrice": 41900,
+    "offerPrice": 38900,
+    "stock": 20,
+    "rating": 4.8,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Samsung Galaxy Watch 6 LTE",
+    "brand": "Samsung",
+    "category": "Smart Watches",
+    "description": "Track your fitness, sleep quality, and wellness with the Samsung Galaxy Watch 6. Features LTE connectivity, a personalized heart rate zone tracker, and a sleek modern design.",
+    "highlights": [
+      "Personalized Heart Rate Zone training",
+      "Advanced Sleep Coaching and Analysis",
+      "20% larger display with thinner bezel",
+      "BIA body composition analysis sensor",
+      "LTE capability for standalone calling"
+    ],
+    "specifications": {
+      "processor": "Exynos W930 Dual-Core",
+      "ram": "2 GB",
+      "storage": "16 GB",
+      "display": "1.4\" Super AMOLED Sapphire Crystal",
+      "connectivity": "LTE, Bluetooth 5.3, Wi-Fi, NFC, GPS",
+      "battery": "425 mAh, Up to 40 hours",
+      "weight": "33.3g",
+      "colors": "Graphite, Silver, Gold"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500",
+        "alt": "Samsung Galaxy Watch 6"
+      }
+    ],
+    "originalPrice": 36999,
+    "offerPrice": 32999,
+    "stock": 15,
+    "rating": 4.6,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "OnePlus Watch 2",
+    "brand": "OnePlus",
+    "category": "Smart Watches",
+    "description": "OnePlus Watch 2 delivers an incredible 100-hour battery life in Smart Mode, powered by a unique dual-engine architecture. Run Wear OS 4 with full Google Play access.",
+    "highlights": [
+      "Dual-Engine Architecture (Snapdragon W5 + BES2700)",
+      "Up to 100 hours of battery life in Smart Mode",
+      "Precision dual-frequency GPS (L1+L5)",
+      "Wear OS 4 with Google Assistant & Maps",
+      "Stainless steel chassis and Sapphire Crystal"
+    ],
+    "specifications": {
+      "processor": "Snapdragon W5 Gen 1",
+      "ram": "2 GB",
+      "storage": "32 GB",
+      "display": "1.43\" AMOLED, 466x466 resolution",
+      "connectivity": "Wi-Fi, Bluetooth 5.0, GPS",
+      "battery": "500 mAh, 7.5W fast charging",
+      "weight": "49g",
+      "colors": "Black Steel, Radiant Steel"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500",
+        "alt": "OnePlus Watch 2"
+      }
+    ],
+    "originalPrice": 27999,
+    "offerPrice": 24999,
+    "stock": 12,
+    "rating": 4.5,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Noise ColorFit Pro 5 Max",
+    "brand": "Noise",
+    "category": "Smart Watches",
+    "description": "Noise ColorFit Pro 5 Max offers a large 1.96-inch AMOLED display, BT calling, functional crown, and a complete health suite including SpO2, heart rate, and stress tracking.",
+    "highlights": [
+      "1.96\" AMOLED display with Always-On feature",
+      "Tru Sync Bluetooth Calling with quick dial pad",
+      "Functional rotating crown for easy navigation",
+      "Noise Health Suite (SpO2, 24/7 HR, Stress, Sleep)",
+      "100+ sports modes and IP68 water resistance"
+    ],
+    "specifications": {
+      "display": "1.96\" AMOLED, 410x502 resolution",
+      "connectivity": "Bluetooth 5.3",
+      "battery": "Up to 7 days battery life",
+      "colors": "Elite Black, Elite Silver, Classic Brown, Shadow Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
+        "alt": "Noise ColorFit Pro 5"
+      }
+    ],
+    "originalPrice": 9999,
+    "offerPrice": 4599,
+    "stock": 25,
+    "rating": 4.2,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "boAt Wave Sigma Smartwatch",
+    "brand": "boAt",
+    "category": "Smart Watches",
+    "description": "Level up with the boAt Wave Sigma. Featuring Bluetooth calling, a 2.01-inch HD display, multiple sports modes, and customizable watch faces to match your vibe.",
+    "highlights": [
+      "2.01\" HD display with 550 nits brightness",
+      "Advanced Bluetooth calling with built-in mic",
+      "DIY Watch Face Studio to customize layout",
+      "700+ Active Modes for comprehensive fitness tracking",
+      "IP67 dust and water resistance"
+    ],
+    "specifications": {
+      "display": "2.01\" HD Display",
+      "connectivity": "Bluetooth 5.2",
+      "battery": "Up to 5 days battery life (2 days with BT calling)",
+      "colors": "Active Black, Cherry Blossom, Cool Grey, Deep Blue"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500",
+        "alt": "boAt Wave Sigma"
+      }
+    ],
+    "originalPrice": 7999,
+    "offerPrice": 2199,
+    "stock": 30,
+    "rating": 4.1,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Apple AirPods Pro (2nd Gen) USB-C",
+    "brand": "Apple",
+    "category": "Earbuds",
+    "description": "Rebuilt from the sound up. AirPods Pro features up to 2x more Active Noise Cancellation, Adaptive Audio, and Personalized Spatial Audio with dynamic head tracking.",
+    "highlights": [
+      "Apple-designed H2 chip for immersive audio quality",
+      "Up to 2x more Active Noise Cancellation (ANC)",
+      "Adaptive Audio dynamically blends ANC and Transparency",
+      "MagSafe Charging Case (USB-C) with Speaker and lanyard loop",
+      "Sweat, dust, and water resistant (IP54)"
+    ],
+    "specifications": {
+      "processor": "Apple H2 chip, Apple U1 chip in case",
+      "connectivity": "Bluetooth 5.3",
+      "battery": "Up to 6 hours listening time (up to 30 hours with case)",
+      "weight": "5.3g (each earbud), 50.8g (charging case)",
+      "colors": "White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1588449668365-d15e397f6787?w=500",
+        "alt": "AirPods Pro 2"
+      }
+    ],
+    "originalPrice": 24900,
+    "offerPrice": 22900,
+    "stock": 25,
+    "rating": 4.9,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Sony WF-1000XM5 Noise Cancelling Earbuds",
+    "brand": "Sony",
+    "category": "Earbuds",
+    "description": "The WF-1000XM5 features cutting-edge technology to deliver premium sound quality and the best noise cancelling performance on the market. Dynamic Driver X reproduces deep bass and clean vocals.",
+    "highlights": [
+      "The Best Noise Cancelling earbuds on the market",
+      "High-Resolution Audio Wireless with LDAC support",
+      "AI-based noise reduction algorithm with bone conduction sensor",
+      "Ergonomic, glossy-surface design for comfortable wear",
+      "Multipoint connection to connect two devices at once"
+    ],
+    "specifications": {
+      "processor": "Integrated Processor V2 & HD Noise Cancelling QN2e",
+      "connectivity": "Bluetooth 5.3",
+      "battery": "Up to 8 hours (24 hours total with charging case)",
+      "weight": "5.9g (each earbud)",
+      "colors": "Black, Silver"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1599669454699-248893623440?w=500",
+        "alt": "Sony WF-1000XM5"
+      }
+    ],
+    "originalPrice": 29990,
+    "offerPrice": 23990,
+    "stock": 12,
+    "rating": 4.7,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Samsung Galaxy Buds2 Pro",
+    "brand": "Samsung",
+    "category": "Earbuds",
+    "description": "Galaxy Buds2 Pro delivers 24-bit Hi-Fi audio quality for studio-grade sound. Intelligent ANC blocks out wind and surrounding noise, while the ergonomic fit keeps them secure.",
+    "highlights": [
+      "24-bit Hi-Fi audio for clear, rich sound quality",
+      "Intelligent Active Noise Cancellation (ANC) with 3 High SNR mics",
+      "360 Audio with multi-channel direct and head tracking",
+      "Comfortable and secure ergonomic fit design",
+      "Auto Switch seamlessly transitions audio between Galaxy devices"
+    ],
+    "specifications": {
+      "connectivity": "Bluetooth 5.3",
+      "battery": "Up to 5 hours ANC ON (18 hours total with case)",
+      "weight": "5.5g (each earbud), 43.4g (charging case)",
+      "colors": "Graphite, White, Bora Purple"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",
+        "alt": "Samsung Galaxy Buds2 Pro"
+      }
+    ],
+    "originalPrice": 17999,
+    "offerPrice": 13999,
+    "stock": 18,
+    "rating": 4.6,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "OnePlus Buds 3",
+    "brand": "OnePlus",
+    "category": "Earbuds",
+    "description": "Experience stunning audio with the OnePlus Buds 3. Featuring dual dynamic drivers, up to 49dB smart active noise cancellation, and sliding volume control for ultimate convenience.",
+    "highlights": [
+      "Dual Dynamic Drivers (10.4mm woofer + 6mm tweeter)",
+      "Up to 49dB Active Noise Cancellation with smart adaptation",
+      "Hi-Res Audio with LHDC 5.0 support",
+      "Up to 44 hours of total playback battery life",
+      "Sliding touch control for quick volume adjustments"
+    ],
+    "specifications": {
+      "connectivity": "Bluetooth 5.3",
+      "battery": "Up to 10 hours ANC OFF (44 hours total with case)",
+      "weight": "4.8g (each earbud)",
+      "colors": "Metallic Gray, Splendid Blue"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1608156639585-b3a032ef9689?w=500",
+        "alt": "OnePlus Buds 3"
+      }
+    ],
+    "originalPrice": 6499,
+    "offerPrice": 5499,
+    "stock": 22,
+    "rating": 4.5,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "boAt Airdopes 141",
+    "brand": "boAt",
+    "category": "Earbuds",
+    "description": "Enjoy wire-free listening with the boAt Airdopes 141. Features 42 hours of playback, ENx technology for crystal clear calls, and BEAST mode low latency for gaming.",
+    "highlights": [
+      "42 Hours of total playtime with ASAP Fast Charge",
+      "ENx Tech for environmental noise-free calling",
+      "BEAST Mode 80ms low latency for gaming",
+      "8mm Dynamic Drivers for signatures boAt bass",
+      "One Touch Voice Assistant support"
+    ],
+    "specifications": {
+      "connectivity": "Bluetooth 5.1",
+      "battery": "Up to 6 hours per charge (42 hours total)",
+      "weight": "4g (each earbud)",
+      "colors": "Bold Black, Active Black, Cider Grey, Pure White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500",
+        "alt": "boAt Airdopes 141"
+      }
+    ],
+    "originalPrice": 4490,
+    "offerPrice": 1499,
+    "stock": 45,
+    "rating": 4.2,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Mi Power Bank 3i 20000mAh",
+    "brand": "Xiaomi",
+    "category": "Power Banks",
+    "description": "Mi Power Bank 3i features a massive 20000mAh capacity, 18W fast charging support, triple port output, and advanced 12-layer chip protection.",
+    "highlights": [
+      "Massive 20000mAh Lithium Polymer battery capacity",
+      "18W Fast Charging output to top up devices quickly",
+      "Triple Port Output (2 USB-A + 1 USB-C)",
+      "Supports Power Delivery for charging laptops/tablets",
+      "Advanced 12-layer circuit protection system"
+    ],
+    "specifications": {
+      "connectivity": "USB-C (Input/Output), Micro-USB (Input), 2x USB-A (Output)",
+      "weight": "430g",
+      "colors": "Sandstone Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609592424109-dd9892f1b17c?w=500",
+        "alt": "Mi Power Bank 3i"
+      }
+    ],
+    "originalPrice": 2199,
+    "offerPrice": 1899,
+    "stock": 40,
+    "rating": 4.4,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Anker PowerCore 24K 140W Power Bank",
+    "brand": "Anker",
+    "category": "Power Banks",
+    "description": "Anker PowerCore 24K offers ultra-powerful 2-way charging with a total output of 140W. Features a smart digital display to check battery status and output wattage.",
+    "highlights": [
+      "Ultra-powerful 140W total output with Power Delivery 3.1",
+      "Smart Digital Display shows real-time stats and health",
+      "Massive 24,000mAh capacity charges iPhone 13 up to 5 times",
+      "ActiveShield 2.0 real-time temperature monitoring",
+      "Dual USB-C ports + 1 USB-A port output"
+    ],
+    "specifications": {
+      "connectivity": "2x USB-C (Input/Output), 1x USB-A (Output)",
+      "weight": "630g",
+      "colors": "Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1622445262465-2481c8573736?w=500",
+        "alt": "Anker PowerCore 24K"
+      }
+    ],
+    "originalPrice": 15999,
+    "offerPrice": 12999,
+    "stock": 10,
+    "rating": 4.9,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Ambrane Stylo 20K 20000mAh Power Bank",
+    "brand": "Ambrane",
+    "category": "Power Banks",
+    "description": "Ambrane Stylo 20K is a compact and durable 20000mAh power bank featuring 20W Boosted Speed charging, dual inputs (Micro/Type-C), and dual USB outputs.",
+    "highlights": [
+      "20000mAh battery capacity in a pocket-sized form factor",
+      "20W fast charging output via USB-C Power Delivery",
+      "Dual USB-A outputs + 1 Type-C output/input",
+      "Smart LED charging indicators",
+      "Made in India with full BIS certification"
+    ],
+    "specifications": {
+      "connectivity": "USB-C (Input/Output), Micro-USB (Input), 2x USB-A (Output)",
+      "weight": "410g",
+      "colors": "Green, Blue, Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609592812204-747d96a793c5?w=500",
+        "alt": "Ambrane Stylo 20K"
+      }
+    ],
+    "originalPrice": 2499,
+    "offerPrice": 1599,
+    "stock": 35,
+    "rating": 4.1,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "URBN 10000mAh Ultra Compact Power Bank",
+    "brand": "URBN",
+    "category": "Power Banks",
+    "description": "The URBN 10000mAh power bank fits in the palm of your hand. Delivers 22.5W super-fast charging for smartphones, and is flight-approved for travel convenience.",
+    "highlights": [
+      "Ultra-compact design — smaller than a credit card",
+      "22.5W Super-Fast charging speed",
+      "Charges a standard phone 0-50% in 30 minutes",
+      "Dual Type-C and USB-A output ports",
+      "Carbon-fiber textured exterior for premium grip"
+    ],
+    "specifications": {
+      "connectivity": "USB-C (Input/Output), USB-A (Output)",
+      "weight": "180g",
+      "colors": "Black, Camo, Purple"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=500",
+        "alt": "URBN 10000mAh"
+      }
+    ],
+    "originalPrice": 1999,
+    "offerPrice": 1199,
+    "stock": 50,
+    "rating": 4.2,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Realme 10000mAh Power Bank 3",
+    "brand": "Realme",
+    "category": "Power Banks",
+    "description": "Realme Power Bank 3 features 2-way 22.5W fast charging, dual output ports, carbon fiber texture, and a special low-current mode for AIoT accessories.",
+    "highlights": [
+      "10000mAh high density Lithium Polymer battery",
+      "22.5W Fast Charging output and input speed",
+      "Low-Current Mode for charging smart bands/earbuds",
+      "14-layer circuit protection with premium chips",
+      "Lightweight and ergonomic curved grip design"
+    ],
+    "specifications": {
+      "connectivity": "USB-C (Input/Output), USB-A (Output)",
+      "weight": "210g",
+      "colors": "Yellow, Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1609592424109-dd9892f1b17c?w=500",
+        "alt": "Realme Power Bank 3"
+      }
+    ],
+    "originalPrice": 1999,
+    "offerPrice": 1399,
+    "stock": 30,
+    "rating": 4.3,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Apple 20W USB-C Power Adapter",
+    "brand": "Apple",
+    "category": "Chargers",
+    "description": "The Apple 20W USB-C Power Adapter offers fast, efficient charging at home, in the office, or on the go. Pair it with iPhone 8 or later for fast charging.",
+    "highlights": [
+      "Official Apple accessory for maximum safety and compatibility",
+      "20W output power for speedy iPhone charging",
+      "Sturdy build quality with folding prongs (regional)",
+      "USB-C connector pairs with any USB-C enabled cable",
+      "Recommended for iPhone, iPad, and Apple Watch"
+    ],
+    "specifications": {
+      "connectivity": "USB-C Port",
+      "battery": "20W Max Output",
+      "weight": "58g",
+      "colors": "White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1619143005814-dc44b4de3e78?w=500",
+        "alt": "Apple 20W Charger"
+      }
+    ],
+    "originalPrice": 1900,
+    "offerPrice": 1699,
+    "stock": 60,
+    "rating": 4.8,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Samsung 25W USB-C Fast Charger",
+    "brand": "Samsung",
+    "category": "Chargers",
+    "description": "Get stable and secure power with Samsung 25W Fast Charger. Power Delivery (PD) 3.0 technology provides optimal charging speed for Galaxy smartphones.",
+    "highlights": [
+      "25W Super Fast Charging compatible with Galaxy models",
+      "USB-C interface pairs with PD 3.0 PPS protocol",
+      "Safe, reliable charging prevents over-current/short-circuit",
+      "Travel-friendly compact plug shape",
+      "Energy efficient standby mode"
+    ],
+    "specifications": {
+      "connectivity": "USB-C Port",
+      "battery": "25W Max Output",
+      "weight": "62g",
+      "colors": "Black, White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1606741965326-cb990ae01bb2?w=500",
+        "alt": "Samsung 25W Charger"
+      }
+    ],
+    "originalPrice": 1699,
+    "offerPrice": 1299,
+    "stock": 55,
+    "rating": 4.7,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Anker 511 Charger (Nano 3) 30W",
+    "brand": "Anker",
+    "category": "Chargers",
+    "description": "Anker Nano 3 is a super-compact 30W GaN charger. It is 70% smaller than an original 30W charger, yet delivers the same high-speed charging.",
+    "highlights": [
+      "Powered by GaN technology for cooler, smaller charging",
+      "30W high-speed charging powers MacBook Air and iPhones",
+      "Ultra-compact design fits easily in tiny pockets",
+      "ActiveShield 2.0 temperature monitoring and regulation",
+      "Available in premium pastel colors"
+    ],
+    "specifications": {
+      "connectivity": "USB-C Port",
+      "battery": "30W Max Output",
+      "weight": "34g",
+      "colors": "Aurora White, Lilac Purple, Misty Blue, Black"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500",
+        "alt": "Anker Nano 3"
+      }
+    ],
+    "originalPrice": 2499,
+    "offerPrice": 1799,
+    "stock": 30,
+    "rating": 4.9,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Spigen ArcStation 40W Dual USB C Charger",
+    "brand": "Spigen",
+    "category": "Chargers",
+    "description": "Spigen ArcStation Dual Wall Charger features two USB-C ports delivering up to 40W total output (20W+20W split). Perfect for charging two devices simultaneously.",
+    "highlights": [
+      "40W total output power with dual USB-C ports",
+      "Smart Intelligent Power Allocation (20W + 20W output)",
+      "NaviCon technology protects against heating/power spikes",
+      "Extremely compact plug block design",
+      "Ideal for charging iPhone and Apple Watch together"
+    ],
+    "specifications": {
+      "connectivity": "2x USB-C Ports",
+      "battery": "40W Max (2x 20W Output)",
+      "weight": "75g",
+      "colors": "White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1629131726692-1accd0c53db0?w=500",
+        "alt": "Spigen ArcStation"
+      }
+    ],
+    "originalPrice": 2999,
+    "offerPrice": 1899,
+    "stock": 25,
+    "rating": 4.5,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "OnePlus SUPERVOOC 80W Type-A Power Adapter",
+    "brand": "OnePlus",
+    "category": "Chargers",
+    "description": "Accelerate your charging with OnePlus 80W adapter. SUPERVOOC technology delivers extreme speeds for OnePlus flagship phones, taking OnePlus 10 Pro 0-100% in 32 minutes.",
+    "highlights": [
+      "Extreme 80W Supervooc output capability",
+      "Charges OnePlus 10 Pro 0-50% in 12 minutes",
+      "10-layer smart safety protection controls voltage",
+      "Backward compatible with Warp Charge/Dash Charge",
+      "Original brand charger for absolute safety"
+    ],
+    "specifications": {
+      "connectivity": "USB-A Port",
+      "battery": "80W Max Output",
+      "weight": "92g",
+      "colors": "White"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=500",
+        "alt": "OnePlus 80W Charger"
+      }
+    ],
+    "originalPrice": 3299,
+    "offerPrice": 2899,
+    "stock": 20,
+    "rating": 4.8,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Spigen Tough Armor Case for iPhone 15 Pro",
+    "brand": "Spigen",
+    "category": "Accessories",
+    "description": "Double-layer protection for extreme drop defence. Tough Armor case uses Shock Absorption technology, dual-layer polycarbonate/TPU build, and a built-in kickstand.",
+    "highlights": [
+      "Mil-grade certified drop protection with Air Cushion Technology",
+      "Raised lip edges guard display screen and camera lenses",
+      "Built-in kickstand for hands-free video viewing",
+      "Responsive buttons and perfect exact cutout slots",
+      "Wireless charging and MagSafe compatible design"
+    ],
+    "specifications": {
+      "weight": "45g",
+      "colors": "Black, Metal Slate, Abyss Green"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=500",
+        "alt": "Spigen Tough Armor Case"
+      }
+    ],
+    "originalPrice": 2999,
+    "offerPrice": 1599,
+    "stock": 50,
+    "rating": 4.6,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Apple MagSafe Charger",
+    "brand": "Apple",
+    "category": "Accessories",
+    "description": "The MagSafe Charger makes wireless charging a snap. Perfectly aligned magnets attach to your iPhone 12 or later and provide faster wireless charging up to 15W.",
+    "highlights": [
+      "Official Apple MagSafe wireless charging puck",
+      "Perfect magnetic alignment snap for iPhone 12/13/14/15",
+      "Delivers up to 15W wireless charging output",
+      "Qi-charging compatible to charge iPhone 8 or AirPods",
+      "Premium aluminum shell with soft charging contact pad"
+    ],
+    "specifications": {
+      "connectivity": "USB-C Cable (1m length)",
+      "battery": "15W Wireless Output",
+      "weight": "80g",
+      "colors": "Silver"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1616348436168-de43ad0db179?w=500",
+        "alt": "Apple MagSafe Charger"
+      }
+    ],
+    "originalPrice": 4500,
+    "offerPrice": 3999,
+    "stock": 25,
+    "rating": 4.8,
+    "numReviews": 0,
+    "isFeatured": true
+  },
+  {
+    "name": "Spigen Glas.tR EZ Fit Screen Protector (2-Pack)",
+    "brand": "Spigen",
+    "category": "Accessories",
+    "description": "Tempered glass screen protection with an innovative auto-alignment installation tray. Includes 2 premium 9H hardness tempered glasses for your phone screen.",
+    "highlights": [
+      "Auto-Alignment tray makes bubble-free installation a breeze",
+      "9H hardness tempered glass protects against deep scratches",
+      "Oleophobic coating prevents fingerprints and smudges",
+      "Case-friendly shape fits perfectly with Spigen covers",
+      "Includes 2-pack glasses, dust stickers, and cleaning wipe"
+    ],
+    "specifications": {
+      "weight": "12g",
+      "colors": "Clear"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1584438784894-089d6a128f3e?w=500",
+        "alt": "Spigen Screen Protector"
+      }
+    ],
+    "originalPrice": 1499,
+    "offerPrice": 999,
+    "stock": 60,
+    "rating": 4.7,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "DailyObjects Metal Phone Stand",
+    "brand": "DailyObjects",
+    "category": "Accessories",
+    "description": "Premium aluminum alloy desktop stand for mobile devices. Features double-rotation hinges for adjustable heights and viewing angles, and soft silicone protective pads.",
+    "highlights": [
+      "Premium solid aluminum alloy construction block",
+      "Dual-Axis design for flexible height/angle adjustment",
+      "Non-slip silicone feet protect desk and phone surfaces",
+      "Fully collapsible pocket size layout for travel",
+      "Wide compatibility fits all smartphones and mini tablets"
+    ],
+    "specifications": {
+      "weight": "150g",
+      "colors": "Space Grey, Silver"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=500",
+        "alt": "DailyObjects Phone Stand"
+      }
+    ],
+    "originalPrice": 999,
+    "offerPrice": 499,
+    "stock": 40,
+    "rating": 4.3,
+    "numReviews": 0,
+    "isFeatured": false
+  },
+  {
+    "name": "Ringke Fusion-X Case for Galaxy S24 Ultra",
+    "brand": "Ringke",
+    "category": "Accessories",
+    "description": "Heavy duty hybrid phone cover featuring a semi-transparent rugged design. High-quality TPU bumpers protect corners against heavy bumps, drops, and impact.",
+    "highlights": [
+      "Semi-transparent polycarbonate back shows original phone color",
+      "Rugged TPU bumpers offer extreme corner drop cushion",
+      "Active Touch Technology button response triggers easily",
+      "QuikCatch lanyard loop holes built in to attach straps",
+      "Fully compatible with Qi wireless chargers"
+    ],
+    "specifications": {
+      "weight": "38g",
+      "colors": "Black Camo, Dark Navy"
+    },
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=500",
+        "alt": "Ringke Fusion-X Case"
+      }
+    ],
+    "originalPrice": 1999,
+    "offerPrice": 1299,
+    "stock": 35,
+    "rating": 4.5,
+    "numReviews": 0,
+    "isFeatured": false
+  }
+]

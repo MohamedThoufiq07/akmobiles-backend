@@ -1,0 +1,15 @@
+Django==5.0.6
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+psycopg[binary]
+python-dotenv==1.0.1
+# ---- Deployment (Vercel + Neon Postgres + Cloudinary media) ----
+dj-database-url          # parse DATABASE_URL (Neon) when present
+whitenoise               # serve static files in serverless prod
+cloudinary               # media storage on Vercel's ephemeral FS
+django-cloudinary-storage
+razorpay==1.4.2
+# razorpay 1.4.2 imports pkg_resources, which setuptools removed in 81+.
+# Python 3.12+ no longer bundles setuptools, so pin a version that still ships it.
+setuptools<81
