@@ -25,16 +25,8 @@
     },
     "images": [
       {
-        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
-        "alt": "iPhone 15 Pro Max Front"
-      },
-      {
-        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
-        "alt": "iPhone 15 Pro Max Back"
-      },
-      {
-        "url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0r9Fx4fIRIQZ_rrBceZUNdYMzoPzuErbo6A&s",
-        "alt": "iPhone 15 Pro Max Side"
+        "url": "https://image.cdn.shpy.in/301826/1-1708521332360.jpeg?format=webp",
+        "alt": "iPhone 15 Pro Max"
       }
     ],
     "originalPrice": 159900,
@@ -72,12 +64,8 @@
     },
     "images": [
       {
-        "url": "https://maplestore.in/cdn/shop/files/1_iPhone15_Blue_cc4ed8e3-5247-498f-9793-1a6b208c2e14.png?v=1780314971",
-        "alt": "iPhone 15 Front"
-      },
-      {
-        "url": "https://maplestore.in/cdn/shop/files/1_iPhone15_Blue_cc4ed8e3-5247-498f-9793-1a6b208c2e14.png?v=1780314971",
-        "alt": "iPhone 15 Back"
+        "url": "https://image.cdn.shpy.in/301826/1-1708520956671.jpeg?width=600&format=webp",
+        "alt": "iPhone 15"
       }
     ],
     "originalPrice": 79900,
@@ -116,11 +104,7 @@
     "images": [
       {
         "url": "https://grest.in/cdn/shop/files/Frame_3_5.png?v=1775222416&width=3840",
-        "alt": "iPhone 14 Front"
-      },
-      {
-        "url": "https://grest.in/cdn/shop/files/Frame_3_5.png?v=1775222416&width=3840",
-        "alt": "iPhone 14 Back"
+        "alt": "iPhone 14"
       }
     ],
     "originalPrice": 69900,
@@ -159,11 +143,7 @@
     "images": [
       {
         "url": "https://pngdownload.io/wp-content/uploads/2024/02/Samsung-Galaxy-S24-Ultra-Titanium-Violet-Smartphone-transparent-PNG-image-jpg.webp",
-        "alt": "Samsung Galaxy S24 Ultra Front"
-      },
-      {
-        "url": "https://pngdownload.io/wp-content/uploads/2024/02/Samsung-Galaxy-S24-Ultra-Titanium-Violet-Smartphone-transparent-PNG-image-jpg.webp",
-        "alt": "Samsung Galaxy S24 Ultra Back"
+        "alt": "Samsung Galaxy S24 Ultra"
       }
     ],
     "originalPrice": 134999,
@@ -201,12 +181,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80",
-        "alt": "Samsung Galaxy S24 Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80",
-        "alt": "Samsung Galaxy S24 Back"
+        "url": "https://static.vecteezy.com/system/resources/previews/041/329/788/non_2x/samsung-galaxy-s24-ultra-titanium-blue-back-view-free-png.png",
+        "alt": "Samsung Galaxy S24"
       }
     ],
     "originalPrice": 79999,
@@ -287,12 +263,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
-        "alt": "OnePlus 12 Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
-        "alt": "OnePlus 12 Back"
+        "url": "https://image01-in.oneplus.net/media/202407/04/9052428d8c69bd8bb884c7913af5fa73.png",
+        "alt": "OnePlus 12"
       }
     ],
     "originalPrice": 69999,
@@ -330,12 +302,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
-        "alt": "OnePlus 12R Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80",
-        "alt": "OnePlus 12R Back"
+        "url": "https://oasis.opstatics.com/content/dam/oasis/page/2024/global/product/aston/aston_blue.png",
+        "alt": "OnePlus 12R"
       }
     ],
     "originalPrice": 39999,
@@ -373,12 +341,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
-        "alt": "Xiaomi 14 Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
-        "alt": "Xiaomi 14 Back"
+        "url": "https://i05.appmifile.com/886_item_uk/07/06/2024/f6882a3273c493e81ddafd8366010e8c.png",
+        "alt": "Xiaomi 14"
       }
     ],
     "originalPrice": 69999,
@@ -416,12 +380,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1598965402089-897ce52e8355?w=400&q=80",
-        "alt": "Redmi Note 13 Pro+ Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1598965402089-897ce52e8355?w=400&q=80",
-        "alt": "Redmi Note 13 Pro+ Back"
+        "url": "https://i03.appmifile.com/789_item_in/04/07/2024/291d6375bb3ce600675227b27a29ac3c.png",
+        "alt": "Redmi Note 13 Pro+ 5G"
       }
     ],
     "originalPrice": 32999,
@@ -459,12 +419,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&q=80",
-        "alt": "Redmi 13C Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1581595220892-b0739db3ba8c?w=400&q=80",
-        "alt": "Redmi 13C Back"
+        "url": "https://img-prd-pim.poorvika.com/prodvarval/Redmi-13-5g-orchid-pink-128gb-6gb-ram-Front-Back-View-Thumbnail.png",
+        "alt": "Redmi 13C"
       }
     ],
     "originalPrice": 9999,
@@ -502,12 +458,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1622957040803-26a4508d6e3d?w=400&q=80",
-        "alt": "Vivo X100 Pro Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1622957040803-26a4508d6e3d?w=400&q=80",
-        "alt": "Vivo X100 Pro Back"
+        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1702983248432/61ad5ee6e72682f52d8aa495e314c56c.png",
+        "alt": "Vivo X100 Pro"
       }
     ],
     "originalPrice": 89999,
@@ -545,12 +497,8 @@
     },
     "images": [
       {
-        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1709635464671/567a7babdae995ffb47306d1a22b2b3f.png",
-        "alt": "Vivo V30 Pro Front"
-      },
-      {
-        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1709635464671/567a7babdae995ffb47306d1a22b2b3f.png",
-        "alt": "Vivo V30 Pro Back"
+        "url": "https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1709633883246/7e1e7e35082e2abf290ec7c423d4361f.png",
+        "alt": "Vivo V30 Pro"
       }
     ],
     "originalPrice": 39999,
@@ -588,12 +536,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400&q=80",
-        "alt": "Vivo T3 5G Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=400&q=80",
-        "alt": "Vivo T3 5G Back"
+        "url": "https://img-prd-pim.poorvika.com/cdn-cgi/image/width=500,height=500,quality=75/product/vivo-t3-5g-cosmic-blue-128gb-8gb-ram-front-back-view.png",
+        "alt": "Vivo T3 5G"
       }
     ],
     "originalPrice": 19999,
@@ -631,12 +575,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1591815302525-756a9bcc3425?w=400&q=80",
-        "alt": "Oppo Find X7 Ultra Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1591815302525-756a9bcc3425?w=400&q=80",
-        "alt": "Oppo Find X7 Ultra Back"
+        "url": "https://cdn.beebom.com/mobile/oppo-find-x7-ultra/oppo-find-x7-ultra-back-and-front.png",
+        "alt": "Oppo Find X7 Ultra"
       }
     ],
     "originalPrice": 89999,
@@ -674,12 +614,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400&q=80",
-        "alt": "Oppo Reno 11 Pro Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400&q=80",
-        "alt": "Oppo Reno 11 Pro Back"
+        "url": "https://www.giztop.com/media/catalog/product/cache/97cc1143d2e20f2b0c8ea91aaa12053c/o/p/oppo_reno_11-1_1_.png",
+        "alt": "Oppo Reno 11 Pro"
       }
     ],
     "originalPrice": 39999,
@@ -717,12 +653,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=400&q=80",
-        "alt": "Realme GT 5 Pro Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1615751072497-5f5169febe17?w=400&q=80",
-        "alt": "Realme GT 5 Pro Back"
+        "url": "https://fdn2.gsmarena.com/vv/bigpic/realme-gt5-pro.jpg",
+        "alt": "Realme GT 5 Pro"
       }
     ],
     "originalPrice": 37999,
@@ -760,12 +692,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
-        "alt": "Realme 12 Pro+ Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&q=80",
-        "alt": "Realme 12 Pro+ Back"
+        "url": "https://img-prd-pim.poorvika.com/cdn-cgi/image/width=500,height=500,quality=75/product/realme-12-pro-5g-Navigator-beige-256gb-8gb-ram-front-back-view.png",
+        "alt": "Realme 12 Pro+ 5G"
       }
     ],
     "originalPrice": 27999,
@@ -803,12 +731,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1587502537745-84b86da1204f?w=400&q=80",
-        "alt": "Motorola Edge 50 Pro Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1587502537745-84b86da1204f?w=400&q=80",
-        "alt": "Motorola Edge 50 Pro Back"
+        "url": "https://motorolain.vtexassets.com/arquivos/ids/159178/motorola-edge-50-pro-PDP-ecomm-render-color5-5-.png?v=638614765175970000",
+        "alt": "Motorola Edge 50 Pro"
       }
     ],
     "originalPrice": 35999,
@@ -846,12 +770,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1551355738-1875b9b0c524?w=400&q=80",
-        "alt": "Moto G84 Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1551355738-1875b9b0c524?w=400&q=80",
-        "alt": "Moto G84 Back"
+        "url": "https://p3-ofp.static.pub//fes/cms/2025/07/04/2qxujwoenuvy55t3ornuxcs6sdgtqk899280.png",
+        "alt": "Moto G84 5G"
       }
     ],
     "originalPrice": 19999,
@@ -889,12 +809,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=400&q=80",
-        "alt": "Nothing Phone (2) Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1605236453806-6ff36851218e?w=400&q=80",
-        "alt": "Nothing Phone (2) Back"
+        "url": "https://www.pngall.com/wp-content/uploads/13/Nothing-Phone-1-PNG-Photos.png",
+        "alt": "Nothing Phone (2)"
       }
     ],
     "originalPrice": 44999,
@@ -932,12 +848,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
-        "alt": "Nothing Phone (2a) Front"
-      },
-      {
-        "url": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80",
-        "alt": "Nothing Phone (2a) Back"
+        "url": "https://cdn.shopify.com/s/files/1/0585/2479/5086/products/black-1.png?v=1709369706",
+        "alt": "Nothing Phone (2a)"
       }
     ],
     "originalPrice": 23999,
@@ -1105,11 +1017,7 @@
     "images": [
       {
         "url": "https://cdn.beebom.com/mobile/nokia-g42-5g3.png",
-        "alt": "Nokia G42 5G Front"
-      },
-      {
-        "url": "https://cdn.beebom.com/mobile/nokia-g42-5g3.png",
-        "alt": "Nokia G42 5G Back"
+        "alt": "Nokia G42 5G"
       }
     ],
     "originalPrice": 15999,
@@ -1142,8 +1050,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=500",
-        "alt": "Apple Watch Series 9"
+        "url": "https://pngimg.com/uploads/apple_watch/apple_watch_PNG13.png",
+        "alt": "Apple Watch Series 9 GPS"
       }
     ],
     "originalPrice": 41900,
@@ -1177,8 +1085,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=500",
-        "alt": "Samsung Galaxy Watch 6"
+        "url": "https://www.myg.in/images/thumbnails/300/300/detailed/87/61fDRIfPQEL._SX679_-removebg-preview.png.png",
+        "alt": "Samsung Galaxy Watch 6 LTE"
       }
     ],
     "originalPrice": 36999,
@@ -1212,7 +1120,7 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500",
+        "url": "https://image01-in.oneplus.net/india-oneplus-statics-file/epb/202402/26/2JL5MkAYL9E27en1.png",
         "alt": "OnePlus Watch 2"
       }
     ],
@@ -1243,8 +1151,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-        "alt": "Noise ColorFit Pro 5"
+        "url": "https://instamart-media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,h_600/NI_CATALOG/IMAGES/ciw/2026/2/20/ed44186a-11c6-4fbf-8fef-2b317f7f596f_K1WNTQ5QLR_MN_19022026.png",
+        "alt": "Noise ColorFit Pro 5 Max"
       }
     ],
     "originalPrice": 9999,
@@ -1274,8 +1182,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=500",
-        "alt": "boAt Wave Sigma"
+        "url": "https://www.boat-lifestyle.com/cdn/shop/files/WaveSigma-FI_Black01_600x.png?v=1692856673",
+        "alt": "boAt Wave Sigma Smartwatch"
       }
     ],
     "originalPrice": 7999,
@@ -1306,8 +1214,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1588449668365-d15e397f6787?w=500",
-        "alt": "AirPods Pro 2"
+        "url": "https://www.sathya.store/img/product/xnmxLT0B28I9PDZW.png",
+        "alt": "Apple AirPods Pro (2nd Gen) USB-C"
       }
     ],
     "originalPrice": 24900,
@@ -1338,8 +1246,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1599669454699-248893623440?w=500",
-        "alt": "Sony WF-1000XM5"
+        "url": "https://media.tatacroma.com/Croma%20Assets/Entertainment/Wireless%20Earbuds/Images/301580_0_eu3o0d.png",
+        "alt": "Sony WF-1000XM5 Noise Cancelling Earbuds"
       }
     ],
     "originalPrice": 29990,
@@ -1369,7 +1277,7 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500",
+        "url": "https://png.pngtree.com/png-vector/20250220/ourmid/pngtree-pink-samsung-galaxy-buds-2-pro-wireless-bluetooth-earphones-clipart-illustration-png-image_15539537.png",
         "alt": "Samsung Galaxy Buds2 Pro"
       }
     ],
@@ -1400,7 +1308,7 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1608156639585-b3a032ef9689?w=500",
+        "url": "https://oasis.opstatics.com/content/dam/oasis/page/2024/global/product/euler/spec_blue.png",
         "alt": "OnePlus Buds 3"
       }
     ],
@@ -1431,7 +1339,7 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1627989580309-bfaf3e58af6f?w=500",
+        "url": "https://www.boat-lifestyle.com/cdn/shop/files/AD141-FI_Grey01.png?v=1698391770",
         "alt": "boAt Airdopes 141"
       }
     ],
@@ -1461,8 +1369,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1609592424109-dd9892f1b17c?w=500",
-        "alt": "Mi Power Bank 3i"
+        "url": "https://gadgetshieldz.com/cdn/shop/files/mi-3i-20000mah-power-bank-cosmic-orange-full.webp?v=1778740283&width=1080&width=1080",
+        "alt": "Mi Power Bank 3i 20000mAh"
       }
     ],
     "originalPrice": 2199,
@@ -1491,8 +1399,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1622445262465-2481c8573736?w=500",
-        "alt": "Anker PowerCore 24K"
+        "url": "https://cdn.shopify.com/s/files/1/0917/4807/3750/files/A1289011-Anker_737_Power_Bank_PowerCore_24K_5_cbe40b31-37b4-4a09-8b6c-b5f7fce2f651.png?v=1739687842",
+        "alt": "Anker PowerCore 24K 140W Power Bank"
       }
     ],
     "originalPrice": 15999,
@@ -1521,8 +1429,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1609592812204-747d96a793c5?w=500",
-        "alt": "Ambrane Stylo 20K"
+        "url": "https://img-prd-pim.poorvika.com/cdn-cgi/image/width=500,height=500,quality=75/product/ambrane-stylo-n20-22-5w-20000-mah-power-bank-Purple-Front-view.png",
+        "alt": "Ambrane Stylo 20K 20000mAh Power Bank"
       }
     ],
     "originalPrice": 2499,
@@ -1551,8 +1459,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=500",
-        "alt": "URBN 10000mAh"
+        "url": "https://instamart-media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,h_600/NI_CATALOG/IMAGES/ciw/2026/2/20/108c1933-df4a-407e-b672-c30ddcd05880_MUHEXI81IT_MN_20022026.png",
+        "alt": "URBN 10000mAh Ultra Compact Power Bank"
       }
     ],
     "originalPrice": 1999,
@@ -1581,8 +1489,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1609592424109-dd9892f1b17c?w=500",
-        "alt": "Realme Power Bank 3"
+        "url": "https://m.media-amazon.com/images/I/71Hg2IZMj9L._AC_UF894,1000_QL80_.jpg",
+        "alt": "Realme 10000mAh Power Bank 3"
       }
     ],
     "originalPrice": 1999,
@@ -1612,8 +1520,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1619143005814-dc44b4de3e78?w=500",
-        "alt": "Apple 20W Charger"
+        "url": "https://inventstore.in/wp-content/uploads/2023/06/adapter-20w.png",
+        "alt": "Apple 20W USB-C Power Adapter"
       }
     ],
     "originalPrice": 1900,
@@ -1643,8 +1551,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1606741965326-cb990ae01bb2?w=500",
-        "alt": "Samsung 25W Charger"
+        "url": "https://media-ik.croma.com/prod/https://media.tatacroma.com/Croma%20Assets/Communication/Chargers%20and%20Batteries/Images/222115_0_u6y7vy.png",
+        "alt": "Samsung 25W USB-C Fast Charger"
       }
     ],
     "originalPrice": 1699,
@@ -1674,8 +1582,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=500",
-        "alt": "Anker Nano 3"
+        "url": "https://store.ooredoo.com.kw/media/catalog/product/cache/fe0a302af94e109db698e86ead4007fa/a/r/artboard_1_7.png",
+        "alt": "Anker 511 Charger (Nano 3) 30W"
       }
     ],
     "originalPrice": 2499,
@@ -1705,8 +1613,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1629131726692-1accd0c53db0?w=500",
-        "alt": "Spigen ArcStation"
+        "url": "https://incredideals.co/cdn/shop/files/619o71RvKDL__AC_SL1500_1cc8878b-bd65-41a7-9743-b861efce8b4c_jpg.webp?v=1737264381",
+        "alt": "Spigen ArcStation 40W Dual USB C Charger"
       }
     ],
     "originalPrice": 2999,
@@ -1736,8 +1644,8 @@
     },
     "images": [
       {
-        "url": "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?w=500",
-        "alt": "OnePlus 80W Charger"
+        "url": "https://image01-eu.oneplus.net/media/202503/03/4feb5923d1dfed07c14dfe30329681d8.png",
+        "alt": "OnePlus SUPERVOOC 80W Type-A Power Adapter"
       }
     ],
     "originalPrice": 3299,
