@@ -7,8 +7,8 @@ and migrated on startup, so it needs no Postgres and is fully repeatable
 (just run `python smoke_test.py` — no prior `migrate` required).
 """
 import os, django, json
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "akmobiles.settings")
 os.environ["USE_SQLITE"] = "True"
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "akmobiles.settings")
 django.setup()
 
 # Use an isolated in-memory DB and build its schema up front. This keeps the
@@ -16,7 +16,21 @@ django.setup()
 # table" error you'd get from an un-migrated sqlite file.
 from django.conf import settings as _settings
 from django.core.management import call_command
-_settings.DATABASES["default"]["NAME"] = ":memory:"
+_settings.DATABASES["default"] = {
+    "ENGINE": "django.db.backends.sqlite3",
+    "NAME": ":memory:",
+    "ATOMIC_REQUESTS": False,
+    "AUTOCOMMIT": True,
+    "CONN_MAX_AGE": 0,
+    "CONN_HEALTH_CHECKS": False,
+    "OPTIONS": {},
+    "TIME_ZONE": None,
+    "USER": "",
+    "PASSWORD": "",
+    "HOST": "",
+    "PORT": "",
+    "TEST": {"CHARSET": None, "COLLATION": None, "MIGRATE": True, "MIRROR": None, "NAME": None},
+}
 call_command("migrate", run_syncdb=True, verbosity=0)
 
 from django.test import Client

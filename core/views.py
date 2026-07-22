@@ -101,6 +101,8 @@ def store_settings(request):
         doc.flash_sale_subtitle = data["flashSaleSubtitle"]
     if "flashSaleEndsAt" in data:
         doc.flash_sale_ends_at = data["flashSaleEndsAt"] or None
+    if "banners" in data:
+        doc.banners = data["banners"]
     doc.save()
     return Response({"success": True, "settings": SettingsSerializer(doc).data})
 

@@ -25,5 +25,5 @@ class SettingsSerializer(serializers.ModelSerializer):
         model = Settings
         fields = [
             "_id", "flashSaleActive", "flashSaleTitle", "flashSaleSubtitle",
-            "flashSaleEndsAt", "createdAt", "updatedAt",
+            "flashSaleEndsAt", "banners", "createdAt", "updatedAt",
         ]

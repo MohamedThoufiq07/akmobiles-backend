@@ -48,6 +48,7 @@ class Settings(models.Model):
         max_length=255, default="Deals ending soon! Lowest prices of the month."
     )
     flash_sale_ends_at = models.DateTimeField(null=True, blank=True, default=None)
+    banners = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
