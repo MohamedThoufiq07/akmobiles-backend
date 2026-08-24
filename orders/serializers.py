@@ -47,24 +47,34 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_orderItems(self, obj):
         fields = self.context.get("populate_item_fields")
-        if not fields:
-            return obj.order_items
-
-        ids = [it.get("product") for it in obj.order_items if it.get("product")]
-        products = {p._id: p for p in Product.objects.filter(_id__in=ids)}
-
+        
         result = []
+        ids = [it.get("product") for it in obj.order_items if it.get("product")]
+        products = {p._id: p for p in Product.objects.filter(_id__in=ids)} if fields else {}
+
         for item in obj.order_items:
             item = dict(item)
-            prod = products.get(item.get("product"))
-            if prod:
-                populated = {"_id": prod._id}
-                if "name" in fields:
-                    populated["name"] = prod.name
-                if "images" in fields:
-                    populated["images"] = prod.images
-                if "brand" in fields:
-                    populated["brand"] = prod.brand
-                item["product"] = populated
+            # Clean up the image field
+            img_url = item.get("image", "")
+            if not img_url or "img/1.jpg" in img_url or "http://img" in img_url:
+                item["image"] = f"https://placehold.co/600x600/f1f5f9/64748b?text={item.get('name', 'Product')}"
+            
+            if fields:
+                prod = products.get(item.get("product"))
+                if prod:
+                    populated = {"_id": prod._id}
+                    if "name" in fields:
+                        populated["name"] = prod.name
+                    if "images" in fields:
+                        cleaned_images = []
+                        for p_img in (prod.images or []):
+                            p_url = p_img.get("url", "")
+                            if not p_url or "img/1.jpg" in p_url or "http://img" in p_url:
+                                p_url = f"https://placehold.co/600x600/f1f5f9/64748b?text={prod.brand}"
+                            cleaned_images.append({"url": p_url, "alt": p_img.get("alt", prod.name)})
+                        populated["images"] = cleaned_images
+                    if "brand" in fields:
+                        populated["brand"] = prod.brand
+                    item["product"] = populated
             result.append(item)
         return result
