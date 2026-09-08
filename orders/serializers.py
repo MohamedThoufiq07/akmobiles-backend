@@ -11,6 +11,7 @@ shape it did on the MERN stack.
 
 from rest_framework import serializers
 
+from common.utils import sanitize_image_url
 from products.models import Product
 from .models import Order
 
@@ -56,8 +57,7 @@ class OrderSerializer(serializers.ModelSerializer):
             item = dict(item)
             # Clean up the image field
             img_url = item.get("image", "")
-            if not img_url or "img/1.jpg" in img_url or "http://img" in img_url:
-                item["image"] = f"https://placehold.co/600x600/f1f5f9/64748b?text={item.get('name', 'Product')}"
+            item["image"] = sanitize_image_url(img_url, item.get("name", "Product"))
             
             if fields:
                 prod = products.get(item.get("product"))
@@ -68,10 +68,19 @@ class OrderSerializer(serializers.ModelSerializer):
                     if "images" in fields:
                         cleaned_images = []
                         for p_img in (prod.images or []):
-                            p_url = p_img.get("url", "")
-                            if not p_url or "img/1.jpg" in p_url or "http://img" in p_url:
-                                p_url = f"https://placehold.co/600x600/f1f5f9/64748b?text={prod.brand}"
-                            cleaned_images.append({"url": p_url, "alt": p_img.get("alt", prod.name)})
+                            if isinstance(p_img, dict):
+                                p_url = p_img.get("url", "")
+                                p_alt = p_img.get("alt", prod.name)
+                            elif isinstance(p_img, str):
+                                p_url = p_img
+                                p_alt = prod.name
+                            else:
+                                p_url = ""
+                                p_alt = prod.name
+                            cleaned_images.append({
+                                "url": sanitize_image_url(p_url, prod.brand or prod.name),
+                                "alt": p_alt,
+                            })
                         populated["images"] = cleaned_images
                     if "brand" in fields:
                         populated["brand"] = prod.brand

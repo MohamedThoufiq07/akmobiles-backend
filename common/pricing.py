@@ -1,4 +1,6 @@
 from decimal import Decimal, ROUND_HALF_UP
+
+from common.utils import sanitize_image_url
 from products.models import Product
 
 SHIPPING_THRESHOLD = Decimal("999.00")
@@ -39,13 +41,15 @@ def calculate_order_pricing(order_items):
         items_subtotal_dec += item_total
 
         # Snapshot image
-        image_url = ""
+        raw_image_url = ""
         if product.images and len(product.images) > 0:
             first_img = product.images[0]
             if isinstance(first_img, dict):
-                image_url = first_img.get("url", "")
+                raw_image_url = first_img.get("url", "")
             elif isinstance(first_img, str):
-                image_url = first_img
+                raw_image_url = first_img
+
+        image_url = sanitize_image_url(raw_image_url, product.brand or product.name)
 
         sanitized_items.append({
             "product": product._id,

@@ -5,6 +5,7 @@ frontend already uses (originalPrice, offerPrice, numReviews, isFeatured, ...).
 
 from rest_framework import serializers
 
+from common.utils import sanitize_image_url
 from .models import Product, Review
 
 
@@ -46,10 +47,17 @@ class ProductSerializer(serializers.ModelSerializer):
         images = obj.images or []
         cleaned_images = []
         for img in images:
-            url = img.get("url", "")
-            if not url or "img/1.jpg" in url or "http://img" in url:
-                url = f"https://placehold.co/600x600/f1f5f9/64748b?text={obj.brand}"
-            cleaned_images.append({"url": url, "alt": img.get("alt", obj.name)})
+            if isinstance(img, dict):
+                raw_url = img.get("url", "")
+                alt = img.get("alt", obj.name)
+            elif isinstance(img, str):
+                raw_url = img
+                alt = obj.name
+            else:
+                raw_url = ""
+                alt = obj.name
+            url = sanitize_image_url(raw_url, obj.brand or obj.name)
+            cleaned_images.append({"url": url, "alt": alt})
         return cleaned_images
 
 
@@ -68,8 +76,15 @@ class TopProductSerializer(serializers.ModelSerializer):
         images = obj.images or []
         cleaned_images = []
         for img in images:
-            url = img.get("url", "")
-            if not url or "img/1.jpg" in url or "http://img" in url:
-                url = f"https://placehold.co/600x600/f1f5f9/64748b?text={obj.brand}"
-            cleaned_images.append({"url": url, "alt": img.get("alt", obj.name)})
+            if isinstance(img, dict):
+                raw_url = img.get("url", "")
+                alt = img.get("alt", obj.name)
+            elif isinstance(img, str):
+                raw_url = img
+                alt = obj.name
+            else:
+                raw_url = ""
+                alt = obj.name
+            url = sanitize_image_url(raw_url, obj.brand or obj.name)
+            cleaned_images.append({"url": url, "alt": alt})
         return cleaned_images
