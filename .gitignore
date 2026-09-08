@@ -17,3 +17,5 @@ staticfiles/
 .idea/
 .vscode/
 
+.vercel
+.env*
