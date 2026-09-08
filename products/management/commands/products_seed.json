@@ -1,5 +1,36 @@
 [
   {
+    "name": "AK Phone X",
+    "brand": "AK",
+    "category": "Smartphones",
+    "description": "AK Phone X flagship smartphone with premium performance.",
+    "highlights": [
+      "Flagship Performance",
+      "AMOLED Display",
+      "Long-lasting Battery"
+    ],
+    "specifications": {
+      "processor": "Octa Core",
+      "ram": "8GB",
+      "storage": "128GB",
+      "display": "6.7 inch AMOLED"
+    },
+    "images": [
+      {
+        "url": "https://placehold.co/600x600/534AB7/ffffff?text=AK+Phone+X",
+        "alt": "AK Phone X"
+      }
+    ],
+    "originalPrice": 50,
+    "offerPrice": 10,
+    "stock": 7,
+    "rating": 5.0,
+    "numReviews": 1,
+    "isFeatured": true,
+    "flashSale": false,
+    "numSold": 0
+  },
+  {
     "name": "iPhone 15 Pro Max",
     "brand": "Apple",
     "category": "Smartphones",
@@ -29,8 +60,8 @@
         "alt": "iPhone 15 Pro Max"
       }
     ],
-    "originalPrice": 159900,
-    "offerPrice": 149900,
+    "originalPrice": 16,
+    "offerPrice": 14,
     "stock": 15,
     "isFeatured": true,
     "numSold": 42,
@@ -68,8 +99,8 @@
         "alt": "iPhone 15"
       }
     ],
-    "originalPrice": 79900,
-    "offerPrice": 69900,
+    "originalPrice": 79,
+    "offerPrice": 69,
     "stock": 25,
     "isFeatured": false,
     "numSold": 65,
@@ -107,8 +138,8 @@
         "alt": "iPhone 14"
       }
     ],
-    "originalPrice": 69900,
-    "offerPrice": 58900,
+    "originalPrice": 69,
+    "offerPrice": 58,
     "stock": 20,
     "isFeatured": false,
     "numSold": 80,
@@ -146,8 +177,8 @@
         "alt": "Samsung Galaxy S24 Ultra"
       }
     ],
-    "originalPrice": 134999,
-    "offerPrice": 124999,
+    "originalPrice": 13,
+    "offerPrice": 12,
     "stock": 20,
     "isFeatured": true,
     "numSold": 38,
@@ -185,8 +216,8 @@
         "alt": "Samsung Galaxy S24"
       }
     ],
-    "originalPrice": 79999,
-    "offerPrice": 69999,
+    "originalPrice": 79,
+    "offerPrice": 69,
     "stock": 30,
     "isFeatured": false,
     "numSold": 52,
@@ -228,8 +259,8 @@
         "alt": "Samsung Galaxy A55 Back"
       }
     ],
-    "originalPrice": 28999,
-    "offerPrice": 24999,
+    "originalPrice": 28,
+    "offerPrice": 24,
     "stock": 40,
     "isFeatured": false,
     "numSold": 70,
@@ -267,8 +298,8 @@
         "alt": "OnePlus 12"
       }
     ],
-    "originalPrice": 69999,
-    "offerPrice": 64999,
+    "originalPrice": 69,
+    "offerPrice": 64,
     "stock": 25,
     "isFeatured": true,
     "numSold": 55,
@@ -306,8 +337,8 @@
         "alt": "OnePlus 12R"
       }
     ],
-    "originalPrice": 39999,
-    "offerPrice": 35999,
+    "originalPrice": 39,
+    "offerPrice": 35,
     "stock": 30,
     "isFeatured": false,
     "numSold": 48,
@@ -345,8 +376,8 @@
         "alt": "Xiaomi 14"
       }
     ],
-    "originalPrice": 69999,
-    "offerPrice": 59999,
+    "originalPrice": 69,
+    "offerPrice": 59,
     "stock": 18,
     "isFeatured": true,
     "numSold": 30,
@@ -384,8 +415,8 @@
         "alt": "Redmi Note 13 Pro+ 5G"
       }
     ],
-    "originalPrice": 32999,
-    "offerPrice": 28999,
+    "originalPrice": 32,
+    "offerPrice": 28,
     "stock": 35,
     "isFeatured": false,
     "numSold": 85,
@@ -423,8 +454,8 @@
         "alt": "Redmi 13C"
       }
     ],
-    "originalPrice": 9999,
-    "offerPrice": 8499,
+    "originalPrice": 9,
+    "offerPrice": 8,
     "stock": 60,
     "isFeatured": false,
     "numSold": 150,
@@ -462,8 +493,8 @@
         "alt": "Vivo X100 Pro"
       }
     ],
-    "originalPrice": 89999,
-    "offerPrice": 79999,
+    "originalPrice": 8,
+    "offerPrice": 7,
     "stock": 12,
     "isFeatured": true,
     "numSold": 22,
@@ -501,8 +532,8 @@
         "alt": "Vivo V30 Pro"
       }
     ],
-    "originalPrice": 39999,
-    "offerPrice": 34999,
+    "originalPrice": 39,
+    "offerPrice": 34,
     "stock": 25,
     "isFeatured": false,
     "numSold": 35,
@@ -540,8 +571,8 @@
         "alt": "Vivo T3 5G"
       }
     ],
-    "originalPrice": 19999,
-    "offerPrice": 17499,
+    "originalPrice": 19,
+    "offerPrice": 17,
     "stock": 50,
     "isFeatured": false,
     "numSold": 95,
@@ -579,8 +610,8 @@
         "alt": "Oppo Find X7 Ultra"
       }
     ],
-    "originalPrice": 89999,
-    "offerPrice": 79999,
+    "originalPrice": 99,
+    "offerPrice": 79,
     "stock": 10,
     "isFeatured": true,
     "numSold": 15,
@@ -618,8 +649,8 @@
         "alt": "Oppo Reno 11 Pro"
       }
     ],
-    "originalPrice": 39999,
-    "offerPrice": 34999,
+    "originalPrice": 39,
+    "offerPrice": 34,
     "stock": 30,
     "isFeatured": false,
     "numSold": 45,
@@ -1124,8 +1155,8 @@
         "alt": "OnePlus Watch 2"
       }
     ],
-    "originalPrice": 27999,
-    "offerPrice": 24999,
+    "originalPrice": 27,
+    "offerPrice": 24,
     "stock": 12,
     "rating": 4.5,
     "numReviews": 0,
@@ -1155,8 +1186,8 @@
         "alt": "Noise ColorFit Pro 5 Max"
       }
     ],
-    "originalPrice": 9999,
-    "offerPrice": 4599,
+    "originalPrice": 9,
+    "offerPrice": 4,
     "stock": 25,
     "rating": 4.2,
     "numReviews": 0,
@@ -1186,8 +1217,8 @@
         "alt": "boAt Wave Sigma Smartwatch"
       }
     ],
-    "originalPrice": 7999,
-    "offerPrice": 2199,
+    "originalPrice": 7,
+    "offerPrice": 2,
     "stock": 30,
     "rating": 4.1,
     "numReviews": 0,
@@ -1218,8 +1249,8 @@
         "alt": "Apple AirPods Pro (2nd Gen) USB-C"
       }
     ],
-    "originalPrice": 24900,
-    "offerPrice": 22900,
+    "originalPrice": 24,
+    "offerPrice": 22,
     "stock": 25,
     "rating": 4.9,
     "numReviews": 0,
@@ -1250,8 +1281,8 @@
         "alt": "Sony WF-1000XM5 Noise Cancelling Earbuds"
       }
     ],
-    "originalPrice": 29990,
-    "offerPrice": 23990,
+    "originalPrice": 29,
+    "offerPrice": 23,
     "stock": 12,
     "rating": 4.7,
     "numReviews": 0,
@@ -1281,8 +1312,8 @@
         "alt": "Samsung Galaxy Buds2 Pro"
       }
     ],
-    "originalPrice": 17999,
-    "offerPrice": 13999,
+    "originalPrice": 17,
+    "offerPrice": 13,
     "stock": 18,
     "rating": 4.6,
     "numReviews": 0,
@@ -1312,8 +1343,8 @@
         "alt": "OnePlus Buds 3"
       }
     ],
-    "originalPrice": 6499,
-    "offerPrice": 5499,
+    "originalPrice": 64,
+    "offerPrice": 54,
     "stock": 22,
     "rating": 4.5,
     "numReviews": 0,
@@ -1343,8 +1374,8 @@
         "alt": "boAt Airdopes 141"
       }
     ],
-    "originalPrice": 4490,
-    "offerPrice": 1499,
+    "originalPrice": 44,
+    "offerPrice": 14,
     "stock": 45,
     "rating": 4.2,
     "numReviews": 0,
@@ -1373,8 +1404,8 @@
         "alt": "Mi Power Bank 3i 20000mAh"
       }
     ],
-    "originalPrice": 2199,
-    "offerPrice": 1899,
+    "originalPrice": 21,
+    "offerPrice": 18,
     "stock": 40,
     "rating": 4.4,
     "numReviews": 0,
@@ -1403,8 +1434,8 @@
         "alt": "Anker PowerCore 24K 140W Power Bank"
       }
     ],
-    "originalPrice": 15999,
-    "offerPrice": 12999,
+    "originalPrice": 15,
+    "offerPrice": 12,
     "stock": 10,
     "rating": 4.9,
     "numReviews": 0,
@@ -1433,8 +1464,8 @@
         "alt": "Ambrane Stylo 20K 20000mAh Power Bank"
       }
     ],
-    "originalPrice": 2499,
-    "offerPrice": 1599,
+    "originalPrice": 24,
+    "offerPrice": 15,
     "stock": 35,
     "rating": 4.1,
     "numReviews": 0,
@@ -1463,8 +1494,8 @@
         "alt": "URBN 10000mAh Ultra Compact Power Bank"
       }
     ],
-    "originalPrice": 1999,
-    "offerPrice": 1199,
+    "originalPrice": 19,
+    "offerPrice": 11,
     "stock": 50,
     "rating": 4.2,
     "numReviews": 0,
@@ -1493,8 +1524,8 @@
         "alt": "Realme 10000mAh Power Bank 3"
       }
     ],
-    "originalPrice": 1999,
-    "offerPrice": 1399,
+    "originalPrice": 19,
+    "offerPrice": 13,
     "stock": 30,
     "rating": 4.3,
     "numReviews": 0,
@@ -1524,8 +1555,8 @@
         "alt": "Apple 20W USB-C Power Adapter"
       }
     ],
-    "originalPrice": 1900,
-    "offerPrice": 1699,
+    "originalPrice": 19,
+    "offerPrice": 16,
     "stock": 60,
     "rating": 4.8,
     "numReviews": 0,
@@ -1555,8 +1586,8 @@
         "alt": "Samsung 25W USB-C Fast Charger"
       }
     ],
-    "originalPrice": 1699,
-    "offerPrice": 1299,
+    "originalPrice": 16,
+    "offerPrice": 12,
     "stock": 55,
     "rating": 4.7,
     "numReviews": 0,
@@ -1586,8 +1617,8 @@
         "alt": "Anker 511 Charger (Nano 3) 30W"
       }
     ],
-    "originalPrice": 2499,
-    "offerPrice": 1799,
+    "originalPrice": 24,
+    "offerPrice": 17,
     "stock": 30,
     "rating": 4.9,
     "numReviews": 0,
@@ -1617,8 +1648,8 @@
         "alt": "Spigen ArcStation 40W Dual USB C Charger"
       }
     ],
-    "originalPrice": 2999,
-    "offerPrice": 1899,
+    "originalPrice": 29,
+    "offerPrice": 18,
     "stock": 25,
     "rating": 4.5,
     "numReviews": 0,
@@ -1648,9 +1679,9 @@
         "alt": "OnePlus SUPERVOOC 80W Type-A Power Adapter"
       }
     ],
-    "originalPrice": 3299,
-    "offerPrice": 2899,
-    "stock": 20,
+    "originalPrice": 39,
+    "offerPrice": 28,
+    "stock": 19,
     "rating": 4.8,
     "numReviews": 0,
     "isFeatured": false
@@ -1677,8 +1708,8 @@
         "alt": "Spigen Tough Armor Case"
       }
     ],
-    "originalPrice": 2999,
-    "offerPrice": 1599,
+    "originalPrice": 29,
+    "offerPrice": 15,
     "stock": 50,
     "rating": 4.6,
     "numReviews": 0,
@@ -1708,9 +1739,9 @@
         "alt": "Apple MagSafe Charger"
       }
     ],
-    "originalPrice": 4500,
-    "offerPrice": 3999,
-    "stock": 25,
+    "originalPrice": 4,
+    "offerPrice": 3,
+    "stock": 24,
     "rating": 4.8,
     "numReviews": 0,
     "isFeatured": true
@@ -1737,8 +1768,8 @@
         "alt": "Spigen Screen Protector"
       }
     ],
-    "originalPrice": 1499,
-    "offerPrice": 999,
+    "originalPrice": 14,
+    "offerPrice": 9,
     "stock": 60,
     "rating": 4.7,
     "numReviews": 0,
@@ -1766,8 +1797,8 @@
         "alt": "DailyObjects Phone Stand"
       }
     ],
-    "originalPrice": 999,
-    "offerPrice": 499,
+    "originalPrice": 9,
+    "offerPrice": 4,
     "stock": 40,
     "rating": 4.3,
     "numReviews": 0,
@@ -1795,9 +1826,9 @@
         "alt": "Ringke Fusion-X Case"
       }
     ],
-    "originalPrice": 1999,
-    "offerPrice": 1299,
-    "stock": 35,
+    "originalPrice": 19,
+    "offerPrice": 12,
+    "stock": 33,
     "rating": 4.5,
     "numReviews": 0,
     "isFeatured": false
