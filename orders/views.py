@@ -56,31 +56,52 @@ def orders_root(request):
     return Response({"success": True, "orders": data, "page": page, "pages": pages, "total": total})
 
 
+from common.pricing import calculate_order_pricing
+
+
 def _create_order(request):
     data = request.data
     order_items = data.get("orderItems") or []
     if not order_items:
         return Response({"success": False, "message": "No order items provided."}, status=400)
 
+    pricing = calculate_order_pricing(order_items)
+    if not pricing["items"]:
+        return Response({"success": False, "message": "No valid order items found."}, status=400)
+
+    # Validate stock
+    for item in pricing["items"]:
+        pid, qty = item["product"], item["quantity"]
+        prod = Product.objects.filter(_id=pid).first()
+        if not prod or prod.stock < qty:
+            prod_name = prod.name if prod else "Product"
+            return Response({"success": False, "message": f"{prod_name} is out of stock or insufficient quantity."}, status=400)
+
+    payment_info = data.get("paymentInfo") or {}
+    is_online_payment = payment_info.get("method") == "Razorpay" or payment_info.get("status") == "Pending"
+
     order = Order.objects.create(
         user=request.user,
-        order_items=order_items,
+        order_items=pricing["items"],
         shipping_address=data.get("shippingAddress") or {},
-        payment_info=data.get("paymentInfo") or {},
-        items_price=data.get("itemsPrice", 0),
-        tax_price=data.get("taxPrice", 0),
-        shipping_price=data.get("shippingPrice", 0),
-        total_price=data.get("totalPrice", 0),
+        payment_info=payment_info,
+        items_price=pricing["items_price"],
+        tax_price=pricing["tax_price"],
+        shipping_price=pricing["shipping_price"],
+        total_price=pricing["total_price"],
+        order_status="Placed",
     )
 
-    # Decrement stock + bump numSold for each product (like the bulkWrite $inc).
-    for item in order_items:
-        pid, qty = item.get("product"), item.get("quantity", 1)
-        if pid:
-            Product.objects.filter(_id=pid).update(
-                stock=F("stock") - qty, num_sold=F("num_sold") + qty
-            )
-    Product.objects.filter(stock__lt=0).update(stock=0)  # clamp negatives
+    # If COD or confirmed paid upfront, reduce stock immediately.
+    # If online Razorpay payment is pending, stock reduction is deferred until payment capture.
+    if not is_online_payment:
+        for item in pricing["items"]:
+            pid, qty = item["product"], item["quantity"]
+            if pid:
+                Product.objects.filter(_id=pid).update(
+                    stock=F("stock") - qty, num_sold=F("num_sold") + qty
+                )
+        Product.objects.filter(stock__lt=0).update(stock=0)
 
     return Response({"success": True, "order": OrderSerializer(order).data}, status=201)
 

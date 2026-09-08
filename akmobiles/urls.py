@@ -29,7 +29,7 @@ urlpatterns = [
     path("api/auth", include("accounts.urls")),
     path("api/products", include("products.urls")),
     path("api/orders", include("orders.urls")),
-    path("api/payment", include("payments.urls")),
+    path("api/payments/", include("payments.urls")),
     path("api", include("core.urls")),
 ]
 
