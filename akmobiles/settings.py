@@ -193,7 +193,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Allowed origins = FRONTEND_URL (the Vercel frontend, comma-separated) + dev.
 _frontend = os.getenv("FRONTEND_URL", "http://localhost:5173")
 CORS_ALLOWED_ORIGINS = [o.strip() for o in _frontend.split(",") if o.strip()]
-for _dev in ("http://localhost:5173", "http://127.0.0.1:5173"):
+for _dev in ("http://localhost:5173", "http://127.0.0.1:5173", "https://akmobile-frontend.vercel.app"):
     if _dev not in CORS_ALLOWED_ORIGINS:
         CORS_ALLOWED_ORIGINS.append(_dev)
 # Any Vercel deploy (preview + prod) for the frontend.
@@ -205,8 +205,9 @@ if env_bool("CORS_ALLOW_ALL", False):
 CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
 ]
-if "https://*.vercel.app" not in CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
+for _trusted in ("https://*.vercel.app", "https://akmobile-frontend.vercel.app"):
+    if _trusted not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_trusted)
 
 # ---- Razorpay ----
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")

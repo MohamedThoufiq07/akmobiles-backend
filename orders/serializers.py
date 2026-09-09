@@ -87,3 +87,39 @@ class OrderSerializer(serializers.ModelSerializer):
                     item["product"] = populated
             result.append(item)
         return result
+
+    def to_representation(self, instance):
+        import json
+
+        data = super().to_representation(instance)
+        # Ensure shippingAddress is always a valid dict
+        ship = data.get("shippingAddress")
+        if isinstance(ship, str):
+            try:
+                data["shippingAddress"] = json.loads(ship)
+            except Exception:
+                data["shippingAddress"] = {}
+        elif not isinstance(ship, dict) or ship is None:
+            data["shippingAddress"] = {}
+
+        # Ensure paymentInfo is always a valid dict
+        payment = data.get("paymentInfo")
+        if isinstance(payment, str):
+            try:
+                data["paymentInfo"] = json.loads(payment)
+            except Exception:
+                data["paymentInfo"] = {}
+        elif not isinstance(payment, dict) or payment is None:
+            data["paymentInfo"] = {}
+
+        # Ensure statusHistory is always a list
+        hist = data.get("statusHistory")
+        if isinstance(hist, str):
+            try:
+                data["statusHistory"] = json.loads(hist)
+            except Exception:
+                data["statusHistory"] = []
+        elif not isinstance(hist, list) or hist is None:
+            data["statusHistory"] = []
+
+        return data

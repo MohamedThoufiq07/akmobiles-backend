@@ -143,17 +143,30 @@ def update_status(request, order_id):
         return Response({"success": False, "message": "Order not found"}, status=404)
 
     status = request.data.get("status")
+    if not status:
+        return Response({"success": False, "message": "Status is required."}, status=400)
+
+    # Terminal state protection: prevent downgrading Delivered or Cancelled
+    if order.order_status in ["Delivered", "Cancelled"] and status != order.order_status:
+        return Response(
+            {"success": False, "message": f"Cannot modify status of a {order.order_status.lower()} order."},
+            status=400,
+        )
+
     order.order_status = status
     history = list(order.status_history or [])
-    history.append({
-        "status": status,
-        "date": timezone.now().isoformat(),
-        "description": STATUS_DESCRIPTIONS.get(status, f"Order status updated to {status}"),
-    })
+    # Append only if not duplicate of the last entry
+    if not history or history[-1].get("status") != status:
+        history.append({
+            "status": status,
+            "date": timezone.now().isoformat(),
+            "description": STATUS_DESCRIPTIONS.get(status, f"Order status updated to {status}"),
+        })
     order.status_history = history
 
     if status == "Delivered":
-        order.delivered_at = timezone.now()
+        if not order.delivered_at:
+            order.delivered_at = timezone.now()
         payment = dict(order.payment_info or {})
         payment["status"] = "Completed"
         order.payment_info = payment
