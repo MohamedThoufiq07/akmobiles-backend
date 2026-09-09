@@ -135,23 +135,27 @@ def user_by_id(request, user_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdmin])
 def dashboard_stats(request):
-    total_customers = User.objects.filter(role="user").count()
-    total_orders = Order.objects.count()
-    total_products = Product.objects.count()
-    total_revenue = Order.objects.aggregate(s=Sum("total_price"))["s"] or 0
-
+    from orders.services import get_admin_orders_queryset
     from orders.serializers import OrderSerializer
-    recent = Order.objects.order_by("-created_at")[:5]
+
+    admin_orders_qs = get_admin_orders_queryset()
+
+    total_customers = User.objects.filter(role="user").count()
+    total_orders = admin_orders_qs.count()
+    total_products = Product.objects.count()
+    total_revenue = admin_orders_qs.aggregate(s=Sum("total_price"))["s"] or 0
+
+    recent = admin_orders_qs.order_by("-created_at")[:5]
     recent_orders = OrderSerializer(recent, many=True, context={"populate_user": True}).data
 
     status_breakdown = [
         {"_id": r["order_status"], "count": r["count"]}
-        for r in Order.objects.values("order_status").annotate(count=Count("_id"))
+        for r in admin_orders_qs.values("order_status").annotate(count=Count("_id"))
     ]
 
     twelve_months = timezone.now() - timedelta(days=365)
     monthly = (
-        Order.objects.filter(created_at__gte=twelve_months)
+        admin_orders_qs.filter(created_at__gte=twelve_months)
         .annotate(month=ExtractMonth("created_at"), year=ExtractYear("created_at"))
         .values("month", "year")
         .annotate(revenue=Sum("total_price"), orders=Count("_id"))
@@ -179,11 +183,14 @@ def dashboard_stats(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, IsAdmin])
 def sales_report(request):
+    from orders.services import get_admin_orders_queryset
+
+    admin_orders_qs = get_admin_orders_queryset()
     period = request.query_params.get("period", "monthly")
     if period == "daily":
         start = timezone.now() - timedelta(days=30)
         rows = (
-            Order.objects.filter(created_at__gte=start)
+            admin_orders_qs.filter(created_at__gte=start)
             .annotate(day=ExtractDay("created_at"), month=ExtractMonth("created_at"),
                       year=ExtractYear("created_at"))
             .values("day", "month", "year")
@@ -198,7 +205,7 @@ def sales_report(request):
     else:
         start = timezone.now() - timedelta(days=365)
         rows = (
-            Order.objects.filter(created_at__gte=start)
+            admin_orders_qs.filter(created_at__gte=start)
             .annotate(month=ExtractMonth("created_at"), year=ExtractYear("created_at"))
             .values("month", "year")
             .annotate(revenue=Sum("total_price"), orders=Count("_id"))

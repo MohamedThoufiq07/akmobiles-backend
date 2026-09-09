@@ -102,15 +102,33 @@ class OrderSerializer(serializers.ModelSerializer):
         elif not isinstance(ship, dict) or ship is None:
             data["shippingAddress"] = {}
 
-        # Ensure paymentInfo is always a valid dict
-        payment = data.get("paymentInfo")
-        if isinstance(payment, str):
+        # Canonical Payment source of truth from Payment model
+        payment_dict = data.get("paymentInfo") or {}
+        if isinstance(payment_dict, str):
             try:
-                data["paymentInfo"] = json.loads(payment)
+                payment_dict = json.loads(payment_dict)
             except Exception:
-                data["paymentInfo"] = {}
-        elif not isinstance(payment, dict) or payment is None:
-            data["paymentInfo"] = {}
+                payment_dict = {}
+        if not isinstance(payment_dict, dict) or payment_dict is None:
+            payment_dict = {}
+
+        # Use related Payment model if available
+        try:
+            payment_obj = instance.payment
+        except Exception:
+            payment_obj = None
+
+        if payment_obj:
+            payment_dict["status"] = payment_obj.status
+            payment_dict["method"] = payment_dict.get("method") or "Razorpay"
+            if payment_obj.razorpay_order_id:
+                payment_dict["razorpayOrderId"] = payment_obj.razorpay_order_id
+            if payment_obj.razorpay_payment_id:
+                payment_dict["razorpayPaymentId"] = payment_obj.razorpay_payment_id
+            if payment_obj.paid_at:
+                payment_dict["paidAt"] = payment_obj.paid_at.isoformat()
+
+        data["paymentInfo"] = payment_dict
 
         # Ensure statusHistory is always a list
         hist = data.get("statusHistory")

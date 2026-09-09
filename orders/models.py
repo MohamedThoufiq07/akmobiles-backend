@@ -16,11 +16,15 @@ from django.utils import timezone
 from common.utils import generate_object_id
 
 ORDER_STATUS_CHOICES = (
+    ("AwaitingPayment", "AwaitingPayment"),
     ("Placed", "Placed"),
     ("Processing", "Processing"),
+    ("Packed", "Packed"),
     ("Shipped", "Shipped"),
+    ("OutForDelivery", "OutForDelivery"),
     ("Delivered", "Delivered"),
     ("Cancelled", "Cancelled"),
+    ("Returned", "Returned"),
 )
 
 
@@ -37,7 +41,7 @@ class Order(models.Model):
     shipping_price = models.FloatField(default=0)
     total_price = models.FloatField(default=0)
 
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default="Placed")
+    order_status = models.CharField(max_length=25, choices=ORDER_STATUS_CHOICES, default="Placed")
     status_history = models.JSONField(default=list, blank=True)
 
     estimated_delivery = models.DateTimeField(null=True, blank=True)
@@ -56,17 +60,11 @@ class Order(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Mirror the Mongoose pre-save on first insert.
         is_new = self._state.adding
         if is_new:
             now = timezone.now()
-            self.estimated_delivery = now + timedelta(days=5)
-            if not self.status_history:
-                self.status_history = [{
-                    "status": "Placed",
-                    "date": now.isoformat(),
-                    "description": "Order has been placed successfully",
-                }]
+            if not self.estimated_delivery:
+                self.estimated_delivery = now + timedelta(days=5)
         super().save(*args, **kwargs)
 
     def __str__(self):

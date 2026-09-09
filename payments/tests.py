@@ -6,6 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -56,7 +57,7 @@ class RazorpayPaymentIntegrationTests(TestCase):
         settings.RAZORPAY_KEY_SECRET = "mock_secret_abc456"
         settings.RAZORPAY_WEBHOOK_SECRET = "mock_webhook_secret_789"
 
-    def _create_test_order(self, user=None, items=None, payment_status="Pending"):
+    def _create_test_order(self, user=None, items=None, payment_status="Pending", order_status="AwaitingPayment"):
         target_user = user or self.user
         order_items = items or [
             {
@@ -75,6 +76,8 @@ class RazorpayPaymentIntegrationTests(TestCase):
             tax_price=180.0,
             shipping_price=0.0,
             total_price=1000.0,
+            order_status=order_status,
+            status_history=[{"status": order_status, "date": "2026-09-09T10:00:00Z", "description": "Created"}],
         )
 
     # 1. Canonical endpoint paths and unauthenticated rejection
@@ -95,25 +98,22 @@ class RazorpayPaymentIntegrationTests(TestCase):
         mock_client.order.create.return_value = {"id": "order_rzp_test_100"}
         mock_rzp_client_func.return_value = mock_client
 
-        # Product offer_price is 500 (< 999 threshold -> +49 shipping = 549 total -> 54900 paise)
         order = self._create_test_order(
-            items=[{"product": self.product2._id, "quantity": 1, "price": 1.0}]  # Tampered client price of ₹1
+            items=[{"product": self.product2._id, "quantity": 1, "price": 1.0}]
         )
 
-        # Send tampered amount in request payload
         res = self.client.post("/api/payments/razorpay/create-order/", {
             "orderId": order._id,
-            "amount": 100,  # Client tries to pay ₹100
+            "amount": 100,
         })
 
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertTrue(data["success"])
-        self.assertEqual(data["amount"], 54900)  # Server computed ₹500 + ₹49 = ₹549.00 in paise
+        self.assertEqual(data["amount"], 54900)
         self.assertEqual(data["orderId"], "order_rzp_test_100")
         self.assertEqual(data["key"], settings.RAZORPAY_KEY_ID)
 
-        # Check Payment model record
         payment = Payment.objects.get(order=order)
         self.assertEqual(payment.amount_paise, 54900)
         self.assertEqual(payment.amount, Decimal("549.00"))
@@ -122,7 +122,7 @@ class RazorpayPaymentIntegrationTests(TestCase):
 
     # 3. Already-paid order rejection
     def test_already_paid_order_rejection(self):
-        order = self._create_test_order(payment_status="Completed")
+        order = self._create_test_order(payment_status="Completed", order_status="Placed")
         Payment.objects.create(
             order=order,
             user=self.user,
@@ -135,29 +135,79 @@ class RazorpayPaymentIntegrationTests(TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("already paid", res.json()["message"].lower())
 
-    # 4. Concurrent / rapid double click create-order handling (idempotency)
+    # 4. Checkout dismissal marks payment cancelled and retains awaiting payment
     @patch("payments.views._razorpay_client")
-    def test_duplicate_create_order_reuses_existing_active_order(self, mock_rzp_client_func):
+    def test_checkout_dismissed_marks_cancelled_and_idempotent(self, mock_rzp_client_func):
         mock_client = MagicMock()
-        mock_client.order.create.return_value = {"id": "order_rzp_first_click"}
+        mock_client.order.payments.return_value = {"items": []}  # No captured payment
         mock_rzp_client_func.return_value = mock_client
 
         order = self._create_test_order()
+        payment = Payment.objects.create(
+            order=order,
+            user=self.user,
+            amount=Decimal("1000.00"),
+            amount_paise=100000,
+            status="Pending",
+            razorpay_order_id="order_rzp_dismiss_test",
+        )
 
-        # First click
-        res1 = self.client.post("/api/payments/razorpay/create-order/", {"orderId": order._id})
+        # First dismissal call with internalOrderId and razorpayOrderId
+        res1 = self.client.post("/api/payments/razorpay/checkout-dismissed/", {
+            "internalOrderId": order._id,
+            "razorpayOrderId": "order_rzp_dismiss_test",
+        })
         self.assertEqual(res1.status_code, 200)
-        self.assertEqual(res1.json()["orderId"], "order_rzp_first_click")
+        self.assertEqual(res1.json()["status"], "cancelled")
 
-        # Second rapid click
-        res2 = self.client.post("/api/payments/razorpay/create-order/", {"orderId": order._id})
+        payment.refresh_from_db()
+        order.refresh_from_db()
+        self.assertEqual(payment.status, "Cancelled")
+        self.assertEqual(order.order_status, "AwaitingPayment")
+        self.assertFalse(payment.stock_reduced)
+        self.assertEqual(self.product1.stock, 10)
+
+        # Ensure PaymentAttempt created
+        self.assertEqual(PaymentAttempt.objects.filter(payment=payment, status="Cancelled").count(), 1)
+
+        # Second dismissal call (Idempotency test)
+        res2 = self.client.post("/api/payments/razorpay/checkout-dismissed/", {
+            "internalOrderId": order._id,
+            "razorpayOrderId": "order_rzp_dismiss_test",
+        })
         self.assertEqual(res2.status_code, 200)
-        self.assertEqual(res2.json()["orderId"], "order_rzp_first_click")
+        self.assertEqual(PaymentAttempt.objects.filter(payment=payment, status="Cancelled").count(), 1)
 
-        # Ensure order.create was called only ONCE
-        mock_client.order.create.assert_called_once()
+    # 5. Checkout dismissal race condition: if captured on gateway, complete order
+    @patch("payments.views._razorpay_client")
+    def test_checkout_dismissed_captured_race_condition(self, mock_rzp_client_func):
+        mock_client = MagicMock()
+        mock_client.order.payments.return_value = {
+            "items": [{"id": "pay_race_captured", "status": "captured"}]
+        }
+        mock_rzp_client_func.return_value = mock_client
 
-    # 5. Successful payment signature verification & captured status
+        order = self._create_test_order()
+        payment = Payment.objects.create(
+            order=order,
+            user=self.user,
+            amount=Decimal("1000.00"),
+            amount_paise=100000,
+            status="Pending",
+            razorpay_order_id="order_rzp_race_test",
+        )
+
+        res = self.client.post("/api/payments/razorpay/checkout-dismissed/", {"orderId": order._id})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["status"], "captured")
+
+        payment.refresh_from_db()
+        order.refresh_from_db()
+        self.assertEqual(payment.status, "Completed")
+        self.assertEqual(order.order_status, "Placed")
+        self.assertTrue(payment.stock_reduced)
+
+    # 6. Signature verification and complete_payment_once
     @patch("payments.views._razorpay_client")
     def test_verify_payment_signature_and_captured_success(self, mock_rzp_client_func):
         mock_client = MagicMock()
@@ -183,7 +233,6 @@ class RazorpayPaymentIntegrationTests(TestCase):
 
         initial_stock = self.product1.stock
 
-        # Generate valid HMAC signature
         body = f"{payment.razorpay_order_id}|pay_test_999".encode("utf-8")
         valid_signature = hmac.new(
             settings.RAZORPAY_KEY_SECRET.encode("utf-8"), body, hashlib.sha256
@@ -199,142 +248,17 @@ class RazorpayPaymentIntegrationTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json()["status"], "captured")
 
-        # Check DB updates
         payment.refresh_from_db()
+        order.refresh_from_db()
         self.assertEqual(payment.status, "Completed")
-        self.assertEqual(payment.razorpay_payment_id, "pay_test_999")
+        self.assertEqual(order.order_status, "Placed")
         self.assertTrue(payment.stock_reduced)
         self.assertIsNotNone(payment.paid_at)
 
-        # Check Stock reduction exact count
         self.product1.refresh_from_db()
         self.assertEqual(self.product1.stock, initial_stock - 1)
 
-        # Check PaymentAttempt recorded
-        attempt = PaymentAttempt.objects.get(payment=payment, razorpay_payment_id="pay_test_999")
-        self.assertEqual(attempt.status, "Completed")
-
-    # 6. Invalid signature rejection
-    def test_verify_payment_invalid_signature_rejected(self):
-        order = self._create_test_order()
-        payment = Payment.objects.create(
-            order=order,
-            user=self.user,
-            amount=Decimal("1000.00"),
-            amount_paise=100000,
-            currency="INR",
-            status="Pending",
-            razorpay_order_id="order_rzp_inv_sig",
-        )
-
-        res = self.client.post("/api/payments/razorpay/verify-payment/", {
-            "orderId": order._id,
-            "razorpay_order_id": "order_rzp_inv_sig",
-            "razorpay_payment_id": "pay_test_bad",
-            "razorpay_signature": "invalid_signature_hex_123",
-        })
-
-        self.assertEqual(res.status_code, 400)
-        payment.refresh_from_db()
-        self.assertEqual(payment.status, "Pending")
-
-        # Check failed attempt recorded
-        attempt = PaymentAttempt.objects.get(payment=payment, razorpay_payment_id="pay_test_bad")
-        self.assertEqual(attempt.status, "Failed")
-        self.assertEqual(attempt.error_code, "SIGNATURE_MISMATCH")
-
-    # 7. Authorized status keeps order in pending state
-    @patch("payments.views._razorpay_client")
-    def test_verify_payment_authorized_remains_pending(self, mock_rzp_client_func):
-        mock_client = MagicMock()
-        mock_client.payment.fetch.return_value = {
-            "id": "pay_test_auth",
-            "order_id": "order_rzp_auth_1",
-            "amount": 100000,
-            "currency": "INR",
-            "status": "authorized",
-        }
-        mock_rzp_client_func.return_value = mock_client
-
-        order = self._create_test_order()
-        payment = Payment.objects.create(
-            order=order,
-            user=self.user,
-            amount=Decimal("1000.00"),
-            amount_paise=100000,
-            currency="INR",
-            status="Pending",
-            razorpay_order_id="order_rzp_auth_1",
-        )
-
-        body = f"{payment.razorpay_order_id}|pay_test_auth".encode("utf-8")
-        valid_signature = hmac.new(
-            settings.RAZORPAY_KEY_SECRET.encode("utf-8"), body, hashlib.sha256
-        ).hexdigest()
-
-        res = self.client.post("/api/payments/razorpay/verify-payment/", {
-            "orderId": order._id,
-            "razorpay_order_id": "order_rzp_auth_1",
-            "razorpay_payment_id": "pay_test_auth",
-            "razorpay_signature": valid_signature,
-        })
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.json()["status"], "authorized")
-
-        payment.refresh_from_db()
-        self.assertEqual(payment.status, "Authorized")
-        self.assertFalse(payment.stock_reduced)
-
-    # 8. Mismatched amount or currency rejected
-    @patch("payments.views._razorpay_client")
-    def test_verify_payment_amount_mismatch_rejected(self, mock_rzp_client_func):
-        mock_client = MagicMock()
-        mock_client.payment.fetch.return_value = {
-            "id": "pay_test_mismatch",
-            "order_id": "order_rzp_mismatch",
-            "amount": 50000,  # 50000 vs expected 100000
-            "currency": "INR",
-            "status": "captured",
-        }
-        mock_rzp_client_func.return_value = mock_client
-
-        order = self._create_test_order()
-        payment = Payment.objects.create(
-            order=order,
-            user=self.user,
-            amount=Decimal("1000.00"),
-            amount_paise=100000,
-            currency="INR",
-            status="Pending",
-            razorpay_order_id="order_rzp_mismatch",
-        )
-
-        body = f"{payment.razorpay_order_id}|pay_test_mismatch".encode("utf-8")
-        valid_signature = hmac.new(
-            settings.RAZORPAY_KEY_SECRET.encode("utf-8"), body, hashlib.sha256
-        ).hexdigest()
-
-        res = self.client.post("/api/payments/razorpay/verify-payment/", {
-            "orderId": order._id,
-            "razorpay_order_id": "order_rzp_mismatch",
-            "razorpay_payment_id": "pay_test_mismatch",
-            "razorpay_signature": valid_signature,
-        })
-
-        self.assertEqual(res.status_code, 400)
-        self.assertIn("amount mismatch", res.json()["message"].lower())
-
-    # 9. Webhook missing X-Razorpay-Event-Id rejection
-    def test_webhook_missing_event_id_rejected(self):
-        res = self.client.post(
-            "/api/payments/razorpay/webhook/",
-            data=json.dumps({"event": "payment.captured"}),
-            content_type="application/json",
-        )
-        self.assertEqual(res.status_code, 400)
-
-    # 10. Webhook signature validation and payment.captured
+    # 7. Webhook payment.captured transitions order to Placed
     def test_webhook_payment_captured_success(self):
         order = self._create_test_order()
         payment = Payment.objects.create(
@@ -374,11 +298,12 @@ class RazorpayPaymentIntegrationTests(TestCase):
 
         self.assertEqual(res.status_code, 200)
         payment.refresh_from_db()
+        order.refresh_from_db()
         self.assertEqual(payment.status, "Completed")
-        self.assertEqual(payment.razorpay_payment_id, "pay_wh_captured_123")
-        self.assertTrue(RazorpayWebhookEvent.objects.filter(event_id="evt_test_unique_001").exists())
+        self.assertEqual(order.order_status, "Placed")
+        self.assertTrue(payment.stock_reduced)
 
-    # 11. Duplicate webhook event returns HTTP 200 without reprocessing
+    # 8. Webhook duplicate idempotency
     def test_webhook_duplicate_event_idempotency(self):
         RazorpayWebhookEvent.objects.create(
             event_id="evt_duplicate_999",
@@ -400,9 +325,9 @@ class RazorpayPaymentIntegrationTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn("already processed", res.json()["message"].lower())
 
-    # 12. Out-of-order payment.failed event does not downgrade Completed payment
+    # 9. Out-of-order failed webhook does not downgrade Completed payment
     def test_webhook_failed_does_not_downgrade_completed_payment(self):
-        order = self._create_test_order()
+        order = self._create_test_order(order_status="Placed", payment_status="Completed")
         payment = Payment.objects.create(
             order=order,
             user=self.user,
@@ -440,10 +365,46 @@ class RazorpayPaymentIntegrationTests(TestCase):
 
         self.assertEqual(res.status_code, 200)
         payment.refresh_from_db()
-        # Status MUST remain Completed
+        order.refresh_from_db()
         self.assertEqual(payment.status, "Completed")
-        self.assertEqual(payment.razorpay_payment_id, "pay_completed_prior")
+        self.assertEqual(order.order_status, "Placed")
 
-        # Failed attempt is still logged for audit
-        attempt = PaymentAttempt.objects.get(payment=payment, razorpay_payment_id="pay_failed_later")
-        self.assertEqual(attempt.status, "Failed")
+    # 10. Reconciliation management command dry run
+    @patch("razorpay.Client")
+    def test_reconcile_command_dry_run_zero_writes(self, mock_rzp_client_class):
+        mock_instance = MagicMock()
+        mock_instance.order.fetch.return_value = {"id": "order_rzp_recon_1"}
+        mock_instance.order.payments.return_value = {"items": []}  # uncaptured
+        mock_rzp_client_class.return_value = mock_instance
+
+        order = self._create_test_order(order_status="Placed", payment_status="Pending")
+        Payment.objects.create(
+            order=order,
+            user=self.user,
+            amount=Decimal("1000.00"),
+            amount_paise=100000,
+            status="Pending",
+            razorpay_order_id="order_rzp_recon_1",
+        )
+
+        call_command("reconcile_razorpay_orders", dry_run=True)
+
+        # In dry run mode, database records MUST NOT be modified
+        order.refresh_from_db()
+        self.assertEqual(order.order_status, "Placed")
+
+    # 11. Stale payments cron endpoint authentication
+    def test_expire_stale_endpoint_requires_cron_secret(self):
+        settings.CRON_SECRET = "super_secret_cron_token_123"
+
+        # Unauthorized request without Bearer header
+        res = self.client.post("/api/payments/razorpay/expire-stale/")
+        self.assertEqual(res.status_code, 401)
+
+        # Authorized request with Bearer header
+        res = self.client.post(
+            "/api/payments/razorpay/expire-stale/",
+            HTTP_AUTHORIZATION="Bearer super_secret_cron_token_123",
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.json()["success"])

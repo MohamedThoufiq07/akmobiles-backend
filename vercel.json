@@ -1,4 +1,10 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "python manage.py migrate --noinput"
+    "buildCommand": "python manage.py migrate --noinput",
+    "crons": [
+        {
+            "path": "/api/payments/razorpay/expire-stale/",
+            "schedule": "0 0 * * *"
+        }
+    ]
 }

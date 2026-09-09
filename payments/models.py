@@ -11,6 +11,8 @@ PAYMENT_STATUS_CHOICES = (
     ("Completed", "Completed"),
     ("Failed", "Failed"),
     ("Cancelled", "Cancelled"),
+    ("Expired", "Expired"),
+    ("Refunded", "Refunded"),
 )
 
 
@@ -54,7 +56,7 @@ class PaymentAttempt(models.Model):
     payment = models.ForeignKey(Payment, related_name="attempts", on_delete=models.CASCADE)
 
     razorpay_payment_id = models.CharField(max_length=100, unique=True, null=True, blank=True, db_index=True)
-    razorpay_order_id = models.CharField(max_length=100, blank=True, default="")
+    razorpay_order_id = models.CharField(max_length=100, blank=True, default="", db_index=True)
     status = models.CharField(max_length=30, choices=PAYMENT_STATUS_CHOICES, default="Pending")
 
     amount_paise = models.BigIntegerField(default=0)
