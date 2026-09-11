@@ -5,6 +5,9 @@ from . import views
 urlpatterns = [
     path("", views.products_root),                                        # GET list / POST create
     path("/upload-session", views.create_upload_session),                 # POST create upload session
+    path("/upload-session/<str:token>/authorize-upload", views.authorize_upload_item), # POST authorize direct upload
+    path("/upload-session/<str:token>/stage-local/<str:item_id>", views.stage_local_upload_item), # PUT local stage
+    path("/upload-session/<str:token>/finalize-upload", views.finalize_upload_item), # POST finalize & verify upload
     path("/upload-session/<str:token>/stage", views.stage_upload_item),   # POST stage uploaded file
     path("/upload-session/<str:token>/items/<str:item_id>", views.remove_staged_item), # DELETE staged file
     path("/featured", views.get_featured),

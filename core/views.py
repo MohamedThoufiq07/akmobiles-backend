@@ -231,21 +231,80 @@ def top_products(request):
 @permission_classes([IsAuthenticated, IsAdmin])
 @parser_classes([MultiPartParser])
 def upload_image(request):
+    import uuid
+    req_id = uuid.uuid4().hex
     file = request.FILES.get("image") or request.FILES.get("file")
     if not file:
-        return Response({"success": False, "message": "No image file provided."}, status=400)
+        return Response({
+            "code": "INVALID_IMAGE",
+            "message": "No image file provided.",
+            "file_name": "",
+            "request_id": req_id,
+        }, status=400)
 
-    from common.storage import upload_to_blob_or_storage
+    from common.storage import (
+        validate_and_decode_image,
+        put_to_vercel_blob,
+        generate_permanent_key,
+        StorageValidationError,
+        StorageConfigError,
+        StorageUpstreamError,
+        StorageTimeoutError,
+    )
     try:
-        result = upload_to_blob_or_storage(file, request=request)
+        val_info = validate_and_decode_image(file)
+        canonical_mime = val_info["content_type"]
+        canonical_ext = val_info["extension"]
+        permanent_key = generate_permanent_key(canonical_ext=canonical_ext)
+
+        file.seek(0)
+        verified_bytes = file.read()
+        put_result = put_to_vercel_blob(permanent_key, verified_bytes, content_type=canonical_mime)
+        url = put_result["url"]
+        if url.startswith("/") and request:
+            url = request.build_absolute_uri(url)
+
         return Response({
             "success": True,
-            "url": result["url"],
-            "storage_key": result["storage_key"],
-            "content_type": result["content_type"],
-            "file_size": result["file_size"],
+            "url": url,
+            "storage_key": permanent_key,
+            "content_type": canonical_mime,
+            "file_size": len(verified_bytes),
+            "width": val_info["width"],
+            "height": val_info["height"],
         }, status=201)
-    except ValueError as val_err:
-        return Response({"success": False, "message": str(val_err)}, status=400)
-    except Exception as exc:
-        return Response({"success": False, "message": "Failed to upload image."}, status=500)
+    except StorageValidationError as val_err:
+        return Response({
+            "code": val_err.code,
+            "message": val_err.message,
+            "file_name": getattr(file, "name", ""),
+            "request_id": req_id,
+        }, status=400)
+    except StorageConfigError as cfg_err:
+        return Response({
+            "code": cfg_err.code,
+            "message": cfg_err.message,
+            "file_name": getattr(file, "name", ""),
+            "request_id": req_id,
+        }, status=503)
+    except StorageUpstreamError as up_err:
+        return Response({
+            "code": up_err.code,
+            "message": up_err.message,
+            "file_name": getattr(file, "name", ""),
+            "request_id": req_id,
+        }, status=502)
+    except StorageTimeoutError as to_err:
+        return Response({
+            "code": to_err.code,
+            "message": to_err.message,
+            "file_name": getattr(file, "name", ""),
+            "request_id": req_id,
+        }, status=504)
+    except Exception:
+        return Response({
+            "code": "INTERNAL_ERROR",
+            "message": "Failed to upload image.",
+            "file_name": getattr(file, "name", ""),
+            "request_id": req_id,
+        }, status=500)

@@ -34,10 +34,27 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+import logging
+import uuid
 from common.permissions import IsAdmin, paginate_queryset
-from common.storage import upload_to_blob_or_storage, delete_from_storage_safe
+from common.storage import (
+    generate_staging_key,
+    finalize_staged_upload_to_permanent,
+    delete_from_storage_safe,
+    get_blob_token,
+    validate_and_decode_image,
+    put_to_vercel_blob,
+    generate_permanent_key,
+    StorageBaseException,
+    StorageValidationError,
+    StorageConfigError,
+    StorageUpstreamError,
+    StorageTimeoutError,
+)
 from .models import Product, ProductImage, ProductUploadSession, ProductUploadItem, Review
 from .serializers import ProductSerializer, ProductImageSerializer
+
+logger = logging.getLogger(__name__)
 
 SORT_MAP = {
     "price_low": "offer_price",
@@ -102,7 +119,7 @@ def _sync_product_images(product, images_data, session_token=None):
             else:
                 continue
 
-            if not url:
+            if not url or "staging/" in url or url.endswith(".upload"):
                 continue
 
             # First image is default primary unless an explicit primary is set
@@ -358,29 +375,260 @@ def create_upload_session(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, IsAdmin])
+def authorize_upload_item(request, token):
+    """
+    POST /api/products/upload-session/<token>/authorize-upload/
+    Issues an authorized direct-upload staging URL and registers a staged item.
+    """
+    session = ProductUploadSession.objects.filter(token=token, status="active").first()
+    if not session or not session.is_valid():
+        return Response({
+            "code": "SESSION_EXPIRED",
+            "message": "Upload session expired or invalid.",
+            "request_id": uuid.uuid4().hex,
+        }, status=409)
+
+    raw_filename = (request.data.get("filename") or "image.jpg").strip()
+    safe_filename = raw_filename[:255]
+
+    item_id = uuid.uuid4().hex[:24]
+    staging_key = generate_staging_key(session.token, item_id=item_id)
+    blob_token = get_blob_token()
+
+    if blob_token:
+        upload_url = f"https://blob.vercel-storage.com/{staging_key}"
+        headers = {
+            "Authorization": f"Bearer {blob_token}",
+            "x-api-version": "7",
+            "x-content-type": "application/octet-stream",
+            "x-access": "public",
+            "x-add-random-suffix": "0",
+        }
+        upload_method = "PUT"
+    else:
+        upload_url = request.build_absolute_uri(f"/api/products/upload-session/{token}/stage-local/{item_id}")
+        headers = {}
+        upload_method = "PUT"
+
+    item = ProductUploadItem.objects.create(
+        _id=item_id,
+        session=session,
+        url=upload_url,
+        storage_key=staging_key,
+        filename=safe_filename,
+        content_type="application/octet-stream",
+        is_committed=False,
+    )
+
+    return Response({
+        "success": True,
+        "uploadUrl": upload_url,
+        "uploadMethod": upload_method,
+        "headers": headers,
+        "stagedItemId": item._id,
+        "stagingKey": staging_key,
+        "item": {
+            "id": item._id,
+            "storageKey": staging_key,
+            "uploadUrl": upload_url,
+            "filename": safe_filename,
+            "status": "uploading",
+        },
+    }, status=201)
+
+
+@api_view(["PUT", "POST"])
+@permission_classes([IsAuthenticated, IsAdmin])
+def stage_local_upload_item(request, token, item_id):
+    """
+    PUT /api/products/upload-session/<token>/stage-local/<item_id>/
+    Development/test fallback handler for direct binary PUT streams.
+    """
+    session = ProductUploadSession.objects.filter(token=token, status="active").first()
+    if not session or not session.is_valid():
+        return Response({"code": "SESSION_EXPIRED", "message": "Upload session expired or invalid."}, status=409)
+
+    item = ProductUploadItem.objects.filter(session=session, _id=item_id, is_committed=False).first()
+    if not item:
+        return Response({"code": "INVALID_IMAGE", "message": "Staged item not found."}, status=404)
+
+    raw_data = request.body
+    if not raw_data:
+        return Response({"code": "INVALID_IMAGE", "message": "No data received."}, status=400)
+
+    saved_name = default_storage.save(item.storage_key, ContentFile(raw_data))
+    item.url = default_storage.url(saved_name)
+    if item.url.startswith("/"):
+        item.url = request.build_absolute_uri(item.url)
+    item.file_size = len(raw_data)
+    item.save(update_fields=["url", "file_size"])
+
+    return Response({"success": True, "url": item.url})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, IsAdmin])
+def finalize_upload_item(request, token):
+    """
+    POST /api/products/upload-session/<token>/finalize-upload/
+    Authoritatively verifies the staged image and promotes it to permanent storage.
+    """
+    req_id = uuid.uuid4().hex
+    session = ProductUploadSession.objects.filter(token=token, status="active").first()
+    if not session or not session.is_valid():
+        return Response({
+            "code": "SESSION_EXPIRED",
+            "message": "Upload session expired or invalid.",
+            "request_id": req_id,
+        }, status=409)
+
+    staged_item_id = (
+        request.data.get("stagedItemId")
+        or request.data.get("itemId")
+        or request.data.get("item_id")
+    )
+    if not staged_item_id:
+        return Response({
+            "code": "INVALID_IMAGE",
+            "message": "stagedItemId or itemId is required.",
+            "request_id": req_id,
+        }, status=400)
+
+    item = ProductUploadItem.objects.filter(session=session, _id=staged_item_id).first()
+    if not item:
+        return Response({
+            "code": "INVALID_IMAGE",
+            "message": "Staged upload item not found in session.",
+            "request_id": req_id,
+        }, status=400)
+
+    # Idempotent replay
+    if not item.storage_key.startswith("products/staging/"):
+        return Response({
+            "success": True,
+            "item": {
+                "id": item._id,
+                "url": item.url,
+                "storageKey": item.storage_key,
+                "filename": item.filename,
+                "fileSize": item.file_size,
+                "contentType": item.content_type,
+            }
+        }, status=200)
+
+    try:
+        final_info = finalize_staged_upload_to_permanent(item, request=request)
+        item.url = final_info["url"]
+        item.storage_key = final_info["storage_key"]
+        item.content_type = final_info["content_type"]
+        item.file_size = final_info["file_size"]
+        item.save()
+
+        return Response({
+            "success": True,
+            "item": {
+                "id": item._id,
+                "url": item.url,
+                "storageKey": item.storage_key,
+                "filename": item.filename,
+                "fileSize": item.file_size,
+                "width": final_info["width"],
+                "height": final_info["height"],
+                "contentType": item.content_type,
+            }
+        }, status=200)
+
+    except StorageValidationError as err:
+        logger.warning("[%s] Finalize validation error for %s: %s", req_id, item.filename, err.message)
+        delete_from_storage_safe(item.storage_key, item.url)
+        item.delete()
+        return Response({
+            "code": err.code,
+            "message": err.message,
+            "file_name": item.filename,
+            "request_id": req_id,
+        }, status=400)
+    except StorageConfigError as err:
+        logger.error("[%s] Finalize storage config error: %s", req_id, err.message)
+        return Response({
+            "code": err.code,
+            "message": err.message,
+            "file_name": item.filename,
+            "request_id": req_id,
+        }, status=503)
+    except StorageUpstreamError as err:
+        logger.error("[%s] Finalize storage upstream error: %s", req_id, err.message)
+        return Response({
+            "code": err.code,
+            "message": err.message,
+            "file_name": item.filename,
+            "request_id": req_id,
+        }, status=502)
+    except StorageTimeoutError as err:
+        logger.error("[%s] Finalize storage timeout error: %s", req_id, err.message)
+        return Response({
+            "code": err.code,
+            "message": err.message,
+            "file_name": item.filename,
+            "request_id": req_id,
+        }, status=504)
+    except Exception as exc:
+        logger.exception("[%s] Unexpected finalize error: %s", req_id, exc)
+        return Response({
+            "code": "INTERNAL_ERROR",
+            "message": "An unexpected error occurred while processing image.",
+            "file_name": item.filename,
+            "request_id": req_id,
+        }, status=500)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, IsAdmin])
 @parser_classes([MultiPartParser, FormParser])
 def stage_upload_item(request, token):
     """
     POST /api/products/upload-session/<token>/stage/
-    Uploads and stages an image file inside the authorized session.
+    Direct multipart stage fallback with authoritative Pillow validation and canonical permanent storage.
     """
+    req_id = uuid.uuid4().hex
     session = ProductUploadSession.objects.filter(token=token, status="active").first()
     if not session or not session.is_valid():
-        return Response({"success": False, "message": "Invalid or expired upload session."}, status=401)
+        return Response({
+            "code": "SESSION_EXPIRED",
+            "message": "Invalid or expired upload session.",
+            "request_id": req_id,
+        }, status=409)
 
     file_obj = request.FILES.get("image") or request.FILES.get("file")
     if not file_obj:
-        return Response({"success": False, "message": "No file provided."}, status=400)
+        return Response({
+            "code": "INVALID_IMAGE",
+            "message": "No file provided.",
+            "file_name": "",
+            "request_id": req_id,
+        }, status=400)
 
     try:
-        result = upload_to_blob_or_storage(file_obj, request=request)
+        val_info = validate_and_decode_image(file_obj)
+        canonical_mime = val_info["content_type"]
+        canonical_ext = val_info["extension"]
+        permanent_key = generate_permanent_key(canonical_ext=canonical_ext)
+
+        file_obj.seek(0)
+        verified_bytes = file_obj.read()
+        put_result = put_to_vercel_blob(permanent_key, verified_bytes, content_type=canonical_mime)
+        url = put_result["url"]
+        if url.startswith("/") and request:
+            url = request.build_absolute_uri(url)
+
         item = ProductUploadItem.objects.create(
             session=session,
-            url=result["url"],
-            storage_key=result["storage_key"],
-            filename=file_obj.name,
-            file_size=result.get("file_size"),
-            content_type=result.get("content_type", "image/jpeg"),
+            url=url,
+            storage_key=permanent_key,
+            filename=file_obj.name[:255],
+            file_size=len(verified_bytes),
+            content_type=canonical_mime,
+            is_committed=False,
         )
         return Response({
             "success": True,
@@ -390,15 +638,46 @@ def stage_upload_item(request, token):
                 "storageKey": item.storage_key,
                 "filename": item.filename,
                 "fileSize": item.file_size,
+                "width": val_info["width"],
+                "height": val_info["height"],
             }
         }, status=201)
-    except ValueError as val_err:
-        return Response({"success": False, "message": str(val_err)}, status=400)
+    except StorageValidationError as val_err:
+        return Response({
+            "code": val_err.code,
+            "message": val_err.message,
+            "file_name": getattr(file_obj, "name", ""),
+            "request_id": req_id,
+        }, status=400)
+    except StorageConfigError as cfg_err:
+        return Response({
+            "code": cfg_err.code,
+            "message": cfg_err.message,
+            "file_name": getattr(file_obj, "name", ""),
+            "request_id": req_id,
+        }, status=503)
+    except StorageUpstreamError as up_err:
+        return Response({
+            "code": up_err.code,
+            "message": up_err.message,
+            "file_name": getattr(file_obj, "name", ""),
+            "request_id": req_id,
+        }, status=502)
+    except StorageTimeoutError as to_err:
+        return Response({
+            "code": to_err.code,
+            "message": to_err.message,
+            "file_name": getattr(file_obj, "name", ""),
+            "request_id": req_id,
+        }, status=504)
     except Exception as exc:
-        import traceback
-        traceback.print_exc()
-        logger.exception("Stage upload failed: %s", exc)
-        return Response({"success": False, "message": str(exc)}, status=500)
+        logger.exception("[%s] Stage upload failed: %s", req_id, exc)
+        return Response({
+            "code": "INTERNAL_ERROR",
+            "message": "Failed to upload image.",
+            "file_name": getattr(file_obj, "name", ""),
+            "request_id": req_id,
+        }, status=500)
 
 
 @api_view(["DELETE"])
@@ -406,15 +685,19 @@ def stage_upload_item(request, token):
 def remove_staged_item(request, token, item_id):
     """
     DELETE /api/products/upload-session/<token>/items/<item_id>/
-    Removes a staged item from the session.
+    Removes a staged item from the session and deletes its uncommitted storage object.
     """
     session = ProductUploadSession.objects.filter(token=token, status="active").first()
     if not session or not session.is_valid():
-        return Response({"success": False, "message": "Invalid or expired upload session."}, status=401)
+        return Response({
+            "code": "SESSION_EXPIRED",
+            "message": "Invalid or expired upload session.",
+            "request_id": uuid.uuid4().hex,
+        }, status=409)
 
     item = ProductUploadItem.objects.filter(session=session, _id=item_id, is_committed=False).first()
     if not item:
-        return Response({"success": False, "message": "Item not found."}, status=404)
+        return Response({"code": "NOT_FOUND", "message": "Item not found."}, status=404)
 
     delete_from_storage_safe(item.storage_key, item.url)
     item.delete()

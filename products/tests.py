@@ -380,17 +380,193 @@ class ProductUploadAndSecurityTests(TestCase):
         jpeg_data = self._create_valid_image_bytes("JPEG", size=(250, 250))
         file = SimpleUploadedFile("valid.jpg", jpeg_data, content_type="image/jpeg")
 
-        res_stage = self.client.post(
-            f"/api/products/upload-session/{token}/stage",
-            {"image": file},
-            format="multipart",
-        )
-        self.assertEqual(res_stage.status_code, 201)
-        self.assertTrue(res_stage.json()["success"])
-        item_id = res_stage.json()["item"]["id"]
+        with patch("products.views.put_to_vercel_blob") as mock_put:
+            mock_put.return_value = {
+                "url": f"https://blob.vercel-storage.com/products/{token}/valid.jpg",
+                "storage_key": f"products/{token}/valid.jpg",
+            }
+            res_stage = self.client.post(
+                f"/api/products/upload-session/{token}/stage",
+                {"image": file},
+                format="multipart",
+            )
+            self.assertEqual(res_stage.status_code, 201)
+            self.assertTrue(res_stage.json()["success"])
+            item_id = res_stage.json()["item"]["id"]
 
-        # Check staged item exists
-        self.assertTrue(ProductUploadItem.objects.filter(_id=item_id, session__token=token).exists())
+            # Check staged item exists
+            self.assertTrue(ProductUploadItem.objects.filter(_id=item_id, session__token=token).exists())
+
+    def test_authorize_upload_creates_staging_key(self):
+        self.client.force_authenticate(user=self.admin)
+        res_session = self.client.post("/api/products/upload-session", {}, format="json")
+        self.assertEqual(res_session.status_code, 201)
+        token = res_session.json()["token"]
+
+        res_auth = self.client.post(
+            f"/api/products/upload-session/{token}/authorize-upload",
+            {"fileName": "iphone.jpg", "contentType": "image/jpeg", "fileSize": 102400},
+            format="json",
+        )
+        self.assertEqual(res_auth.status_code, 201)
+        data = res_auth.json()
+        self.assertTrue(data.get("success"))
+        item = data.get("item")
+        self.assertTrue(item["storageKey"].startswith(f"products/staging/{token}/"))
+        self.assertTrue(item["storageKey"].endswith(".upload"))
+        self.assertEqual(item["status"], "uploading")
+        self.assertIn("uploadUrl", item)
+
+    def test_finalize_upload_promotes_staged_blob_to_permanent(self):
+        self.client.force_authenticate(user=self.admin)
+        res_session = self.client.post("/api/products/upload-session", {}, format="json")
+        token = res_session.json()["token"]
+
+        # 1. Authorize
+        res_auth = self.client.post(
+            f"/api/products/upload-session/{token}/authorize-upload",
+            {"fileName": "sample.png", "contentType": "image/png", "fileSize": 20480},
+            format="json",
+        )
+        self.assertEqual(res_auth.status_code, 201)
+        item_id = res_auth.json()["item"]["id"]
+
+        # 2. Mock Blob storage fetch and put to simulate Vercel Blob workflow
+        png_data = self._create_valid_image_bytes("PNG", size=(300, 300))
+        with patch("products.views.finalize_staged_upload_to_permanent") as mock_finalize:
+            mock_finalize.return_value = {
+                "url": f"https://mock.blob.vercel-storage.com/products/{token}/{item_id}.png",
+                "storage_key": f"products/{token}/{item_id}.png",
+                "format": "PNG",
+                "content_type": "image/png",
+                "file_size": len(png_data),
+                "width": 300,
+                "height": 300,
+            }
+
+            res_final = self.client.post(
+                f"/api/products/upload-session/{token}/finalize-upload",
+                {"itemId": item_id, "fileName": "sample.png"},
+                format="json",
+            )
+            self.assertEqual(res_final.status_code, 200)
+            data = res_final.json()
+            self.assertTrue(data.get("success"))
+            self.assertEqual(data["item"]["url"], f"https://mock.blob.vercel-storage.com/products/{token}/{item_id}.png")
+
+            # Check DB updated
+            db_item = ProductUploadItem.objects.get(_id=item_id)
+            self.assertEqual(db_item.url, f"https://mock.blob.vercel-storage.com/products/{token}/{item_id}.png")
+            self.assertEqual(db_item.storage_key, f"products/{token}/{item_id}.png")
+
+    def test_finalize_upload_normalizes_renamed_file_extension(self):
+        """A JPEG file incorrectly named 'ajay-photo.png' must be finalized as canonical '.jpg'."""
+        self.client.force_authenticate(user=self.admin)
+        res_session = self.client.post("/api/products/upload-session", {}, format="json")
+        token = res_session.json()["token"]
+
+        res_auth = self.client.post(
+            f"/api/products/upload-session/{token}/authorize-upload",
+            {"fileName": "ajay-photo.png", "contentType": "image/png", "fileSize": 50000},
+            format="json",
+        )
+        self.assertEqual(res_auth.status_code, 201)
+        item_id = res_auth.json()["item"]["id"]
+
+        with patch("products.views.finalize_staged_upload_to_permanent") as mock_finalize:
+            mock_finalize.return_value = {
+                "url": f"https://mock.blob.vercel-storage.com/products/{token}/{item_id}.jpg",
+                "storage_key": f"products/{token}/{item_id}.jpg",
+                "format": "JPEG",
+                "content_type": "image/jpeg",
+                "file_size": 50000,
+                "width": 800,
+                "height": 600,
+            }
+
+            res_final = self.client.post(
+                f"/api/products/upload-session/{token}/finalize-upload",
+                {"itemId": item_id, "fileName": "ajay-photo.png"},
+                format="json",
+            )
+            self.assertEqual(res_final.status_code, 200)
+            data = res_final.json()
+            self.assertTrue(data["item"]["url"].endswith(".jpg"))
+
+    def test_finalize_upload_idempotent_replay(self):
+        """Calling finalize on an already-ready item returns 200 with existing metadata without duplicating."""
+        self.client.force_authenticate(user=self.admin)
+        session = ProductUploadSession.objects.create(
+            user=self.admin,
+            expires_at=timezone.now() + timezone.timedelta(hours=1),
+            status="active",
+        )
+        ready_url = f"https://blob.vercel-storage.com/products/{session.token}/ready-item.jpg"
+        item = ProductUploadItem.objects.create(
+            session=session,
+            url=ready_url,
+            storage_key=f"products/{session.token}/ready-item.jpg",
+            is_committed=False,
+        )
+
+        res = self.client.post(
+            f"/api/products/upload-session/{session.token}/finalize-upload",
+            {"itemId": str(item._id), "fileName": "ready-item.jpg"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["item"]["url"], ready_url)
+
+    def test_finalize_upload_expired_session_returns_409(self):
+        self.client.force_authenticate(user=self.admin)
+        session = ProductUploadSession.objects.create(
+            user=self.admin,
+            expires_at=timezone.now() - timezone.timedelta(minutes=5),
+            status="active",
+        )
+        item = ProductUploadItem.objects.create(
+            session=session,
+            url=f"https://blob.vercel-storage.com/products/staging/{session.token}/item.upload",
+            storage_key=f"products/staging/{session.token}/item.upload",
+            is_committed=False,
+        )
+
+        res = self.client.post(
+            f"/api/products/upload-session/{session.token}/finalize-upload",
+            {"itemId": str(item._id), "fileName": "test.jpg"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 409)
+        self.assertEqual(res.json().get("code"), "SESSION_EXPIRED")
+
+    def test_finalize_upload_corrupt_image_returns_400_and_deletes_item(self):
+        from common.storage import StorageValidationError
+        self.client.force_authenticate(user=self.admin)
+        session = ProductUploadSession.objects.create(
+            user=self.admin,
+            expires_at=timezone.now() + timezone.timedelta(hours=1),
+            status="active",
+        )
+        item = ProductUploadItem.objects.create(
+            session=session,
+            url=f"https://blob.vercel-storage.com/products/staging/{session.token}/corrupt.upload",
+            storage_key=f"products/staging/{session.token}/corrupt.upload",
+            is_committed=False,
+        )
+
+        with patch("products.views.finalize_staged_upload_to_permanent", side_effect=StorageValidationError("File content does not match allowed image formats.")):
+            with patch("products.views.delete_from_storage_safe") as mock_del:
+                res = self.client.post(
+                    f"/api/products/upload-session/{session.token}/finalize-upload",
+                    {"itemId": str(item._id), "fileName": "corrupt.jpg"},
+                    format="json",
+                )
+                self.assertEqual(res.status_code, 400)
+                self.assertEqual(res.json().get("code"), "INVALID_IMAGE")
+                mock_del.assert_called_once()
+                # Verify item removed from DB
+                self.assertFalse(ProductUploadItem.objects.filter(_id=item._id).exists())
 
     def test_cleanup_orphaned_blobs_dry_run(self):
         session = ProductUploadSession.objects.create(
