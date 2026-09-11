@@ -51,6 +51,12 @@ from common.storage import (
     StorageUpstreamError,
     StorageTimeoutError,
 )
+from .constants import (
+    MIN_PRODUCT_IMAGES,
+    MAX_PRODUCT_IMAGES,
+    MAX_PRODUCT_IMAGE_BYTES,
+    ACCEPTED_IMAGE_FORMATS,
+)
 from .models import Product, ProductImage, ProductUploadSession, ProductUploadItem, Review
 from .serializers import ProductSerializer, ProductImageSerializer
 
@@ -74,7 +80,8 @@ def _sync_product_images(product, images_data, session_token=None):
     Synchronizes ProductImage records for a product within a transaction.
     images_data can be a list of dicts: [{ url, alt, altText, storage_key, isPrimary, ... }]
     or strings.
-    Ensures at most 10 images, correct sort_order, and exactly one primary image.
+    Ensures between MIN_PRODUCT_IMAGES and MAX_PRODUCT_IMAGES images, distinct IDs, correct sort_order,
+    and exactly one primary image (lowest sort order ready image by default).
     """
     if images_data is None:
         return
@@ -88,8 +95,8 @@ def _sync_product_images(product, images_data, session_token=None):
             session.product = product
             session.save(update_fields=["status", "product", "updated_at"])
 
-    # Limit to maximum 10 images
-    valid_images = images_data[:10]
+    # Enforce maximum images limit
+    valid_images = images_data[:MAX_PRODUCT_IMAGES]
 
     # If new images provided, sync them
     if valid_images:
@@ -174,12 +181,21 @@ def products_root(request):
         if not _is_admin(request):
             return Response({"success": False, "message": "Admin only"}, status=403)
 
+        images_data = request.data.get("images")
+        if images_data is not None and isinstance(images_data, list):
+            if len(images_data) > MAX_PRODUCT_IMAGES:
+                return Response({
+                    "code": "MAX_IMAGES_EXCEEDED",
+                    "message": f"A product can contain a maximum of {MAX_PRODUCT_IMAGES} images.",
+                    "file_name": "",
+                    "request_id": uuid.uuid4().hex,
+                }, status=400)
+
         with transaction.atomic():
             serializer = ProductSerializer(data=request.data)
             if serializer.is_valid():
                 p = serializer.save()
                 # Sync ProductImage rows if images supplied
-                images_data = request.data.get("images")
                 session_token = request.data.get("uploadSessionToken")
                 if images_data is not None:
                     _sync_product_images(p, images_data, session_token=session_token)
@@ -311,12 +327,21 @@ def product_detail(request, product_id):
             product.delete()
         return Response({"success": True, "message": "Product deleted"})
 
+    images_data = request.data.get("images")
+    if images_data is not None and isinstance(images_data, list):
+        if len(images_data) > MAX_PRODUCT_IMAGES:
+            return Response({
+                "code": "MAX_IMAGES_EXCEEDED",
+                "message": f"A product can contain a maximum of {MAX_PRODUCT_IMAGES} images.",
+                "file_name": "",
+                "request_id": uuid.uuid4().hex,
+            }, status=400)
+
     with transaction.atomic():
         serializer = ProductSerializer(product, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        images_data = request.data.get("images")
         session_token = request.data.get("uploadSessionToken")
         if images_data is not None:
             _sync_product_images(product, images_data, session_token=session_token)
@@ -379,62 +404,79 @@ def authorize_upload_item(request, token):
     """
     POST /api/products/upload-session/<token>/authorize-upload/
     Issues an authorized direct-upload staging URL and registers a staged item.
+    Enforces maximum 5 product images under concurrency locking.
     """
-    session = ProductUploadSession.objects.filter(token=token, status="active").first()
-    if not session or not session.is_valid():
+    req_id = uuid.uuid4().hex
+    with transaction.atomic():
+        session = ProductUploadSession.objects.select_for_update().filter(token=token, status="active").first()
+        if not session or not session.is_valid():
+            return Response({
+                "code": "SESSION_EXPIRED",
+                "message": "Upload session expired or invalid.",
+                "request_id": req_id,
+            }, status=409)
+
+        raw_filename = (request.data.get("filename") or "image.jpg").strip()
+        safe_filename = raw_filename[:255]
+
+        # Calculate total active staged items + target product images
+        staged_count = session.items.select_for_update().filter(is_committed=False).count()
+        product_images_count = 0
+        if session.product:
+            product_images_count = session.product.product_images.select_for_update().count()
+
+        if staged_count + product_images_count >= MAX_PRODUCT_IMAGES:
+            return Response({
+                "code": "MAX_IMAGES_EXCEEDED",
+                "message": f"A product can contain a maximum of {MAX_PRODUCT_IMAGES} images.",
+                "file_name": safe_filename,
+                "request_id": req_id,
+            }, status=400)
+
+        item_id = uuid.uuid4().hex[:24]
+        staging_key = generate_staging_key(session.token, item_id=item_id)
+        blob_token = get_blob_token()
+
+        if blob_token:
+            upload_url = f"https://blob.vercel-storage.com/{staging_key}"
+            headers = {
+                "Authorization": f"Bearer {blob_token}",
+                "x-api-version": "7",
+                "x-content-type": "application/octet-stream",
+                "x-access": "public",
+                "x-add-random-suffix": "0",
+            }
+            upload_method = "PUT"
+        else:
+            upload_url = request.build_absolute_uri(f"/api/products/upload-session/{token}/stage-local/{item_id}")
+            headers = {}
+            upload_method = "PUT"
+
+        item = ProductUploadItem.objects.create(
+            _id=item_id,
+            session=session,
+            url=upload_url,
+            storage_key=staging_key,
+            filename=safe_filename,
+            content_type="application/octet-stream",
+            is_committed=False,
+        )
+
         return Response({
-            "code": "SESSION_EXPIRED",
-            "message": "Upload session expired or invalid.",
-            "request_id": uuid.uuid4().hex,
-        }, status=409)
-
-    raw_filename = (request.data.get("filename") or "image.jpg").strip()
-    safe_filename = raw_filename[:255]
-
-    item_id = uuid.uuid4().hex[:24]
-    staging_key = generate_staging_key(session.token, item_id=item_id)
-    blob_token = get_blob_token()
-
-    if blob_token:
-        upload_url = f"https://blob.vercel-storage.com/{staging_key}"
-        headers = {
-            "Authorization": f"Bearer {blob_token}",
-            "x-api-version": "7",
-            "x-content-type": "application/octet-stream",
-            "x-access": "public",
-            "x-add-random-suffix": "0",
-        }
-        upload_method = "PUT"
-    else:
-        upload_url = request.build_absolute_uri(f"/api/products/upload-session/{token}/stage-local/{item_id}")
-        headers = {}
-        upload_method = "PUT"
-
-    item = ProductUploadItem.objects.create(
-        _id=item_id,
-        session=session,
-        url=upload_url,
-        storage_key=staging_key,
-        filename=safe_filename,
-        content_type="application/octet-stream",
-        is_committed=False,
-    )
-
-    return Response({
-        "success": True,
-        "uploadUrl": upload_url,
-        "uploadMethod": upload_method,
-        "headers": headers,
-        "stagedItemId": item._id,
-        "stagingKey": staging_key,
-        "item": {
-            "id": item._id,
-            "storageKey": staging_key,
+            "success": True,
             "uploadUrl": upload_url,
-            "filename": safe_filename,
-            "status": "uploading",
-        },
-    }, status=201)
+            "uploadMethod": upload_method,
+            "headers": headers,
+            "stagedItemId": item._id,
+            "stagingKey": staging_key,
+            "item": {
+                "id": item._id,
+                "storageKey": staging_key,
+                "uploadUrl": upload_url,
+                "filename": safe_filename,
+                "status": "uploading",
+            },
+        }, status=201)
 
 
 @api_view(["PUT", "POST"])
@@ -710,23 +752,28 @@ def add_product_image(request, product_id):
     """
     POST /api/products/<product_id>/images/
     Directly attaches an uploaded image metadata to an existing product.
+    Enforces MAX_PRODUCT_IMAGES limit under concurrency lock.
     """
-    product = Product.objects.filter(_id=product_id).first()
-    if not product:
-        return Response({"success": False, "message": "Product not found."}, status=404)
-
-    if product.product_images.count() >= 10:
-        return Response({"success": False, "message": "Maximum 10 images allowed per product."}, status=400)
-
-    url = request.data.get("url")
-    if not url:
-        return Response({"success": False, "message": "Image URL is required."}, status=400)
-
-    storage_key = request.data.get("storageKey") or request.data.get("storage_key") or ""
-    alt_text = request.data.get("altText") or request.data.get("alt") or product.name
-
+    req_id = uuid.uuid4().hex
     with transaction.atomic():
         locked_product = Product.objects.select_for_update().filter(_id=product_id).first()
+        if not locked_product:
+            return Response({"success": False, "message": "Product not found."}, status=404)
+
+        if locked_product.product_images.count() >= MAX_PRODUCT_IMAGES:
+            return Response({
+                "code": "MAX_IMAGES_EXCEEDED",
+                "message": f"Maximum {MAX_PRODUCT_IMAGES} images allowed per product.",
+                "request_id": req_id,
+            }, status=400)
+
+        url = request.data.get("url")
+        if not url:
+            return Response({"success": False, "message": "Image URL is required."}, status=400)
+
+        storage_key = request.data.get("storageKey") or request.data.get("storage_key") or ""
+        alt_text = request.data.get("altText") or request.data.get("alt") or locked_product.name
+
         existing_count = locked_product.product_images.count()
         is_first = existing_count == 0
 
@@ -750,6 +797,7 @@ def reorder_product_images(request, product_id):
     Reorders images according to the array of image IDs provided.
     The first image in the reordered list becomes primary.
     """
+    req_id = uuid.uuid4().hex
     product = Product.objects.filter(_id=product_id).first()
     if not product:
         return Response({"success": False, "message": "Product not found."}, status=404)
@@ -757,6 +805,16 @@ def reorder_product_images(request, product_id):
     image_ids = request.data.get("imageIds") or request.data.get("image_ids") or []
     if not isinstance(image_ids, list):
         return Response({"success": False, "message": "imageIds array is required."}, status=400)
+
+    if len(image_ids) > MAX_PRODUCT_IMAGES:
+        return Response({
+            "code": "MAX_IMAGES_EXCEEDED",
+            "message": f"Maximum {MAX_PRODUCT_IMAGES} images allowed per product.",
+            "request_id": req_id,
+        }, status=400)
+
+    if len(image_ids) != len(set(image_ids)):
+        return Response({"success": False, "message": "Duplicate image IDs provided in reorder."}, status=400)
 
     with transaction.atomic():
         locked_product = Product.objects.select_for_update().filter(_id=product_id).first()

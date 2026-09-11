@@ -568,6 +568,114 @@ class ProductUploadAndSecurityTests(TestCase):
                 # Verify item removed from DB
                 self.assertFalse(ProductUploadItem.objects.filter(_id=item._id).exists())
 
+    def test_authorize_upload_rejects_sixth_image(self):
+        """Authorizing a 6th image when 5 staged items exist returns 400 MAX_IMAGES_EXCEEDED."""
+        self.client.force_authenticate(user=self.admin)
+        res_session = self.client.post("/api/products/upload-session", {}, format="json")
+        token = res_session.json()["token"]
+        session = ProductUploadSession.objects.get(token=token)
+
+        # Create 5 uncommitted staged items
+        for i in range(5):
+            ProductUploadItem.objects.create(
+                session=session,
+                url=f"https://blob.vercel-storage.com/products/staging/{token}/item_{i}.upload",
+                storage_key=f"products/staging/{token}/item_{i}.upload",
+                is_committed=False,
+            )
+
+        res_sixth = self.client.post(
+            f"/api/products/upload-session/{token}/authorize-upload",
+            {"fileName": "sixth.jpg", "contentType": "image/jpeg", "fileSize": 102400},
+            format="json",
+        )
+        self.assertEqual(res_sixth.status_code, 400)
+        self.assertEqual(res_sixth.json().get("code"), "MAX_IMAGES_EXCEEDED")
+
+    def test_create_product_rejects_more_than_five_images(self):
+        self.client.force_authenticate(user=self.admin)
+        images = [{"url": f"https://blob.vercel-storage.com/p/img_{i}.jpg", "sortOrder": i} for i in range(6)]
+        payload = {
+            "name": "Excess Image Phone",
+            "brand": "Apple",
+            "category": "Smartphones",
+            "description": "Phone description",
+            "originalPrice": 80000,
+            "offerPrice": 75000,
+            "deliveryCharge": "49.00",
+            "stock": 10,
+            "images": images,
+        }
+        res = self.client.post("/api/products", payload, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json().get("code"), "MAX_IMAGES_EXCEEDED")
+
+    def test_update_product_rejects_more_than_five_images(self):
+        self.client.force_authenticate(user=self.admin)
+        product = Product.objects.create(
+            name="Existing Phone",
+            brand="Samsung",
+            category="Smartphones",
+            description="Test phone",
+            original_price=50000,
+            offer_price=45000,
+            stock=5,
+        )
+        images = [{"url": f"https://blob.vercel-storage.com/p/img_{i}.jpg", "sortOrder": i} for i in range(6)]
+        res = self.client.put(f"/api/products/{product._id}", {"images": images}, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json().get("code"), "MAX_IMAGES_EXCEEDED")
+
+    def test_add_product_image_rejects_sixth_image(self):
+        self.client.force_authenticate(user=self.admin)
+        product = Product.objects.create(
+            name="Max Image Phone",
+            brand="Apple",
+            category="Smartphones",
+            description="Test phone",
+            original_price=90000,
+            offer_price=85000,
+            stock=5,
+        )
+        for i in range(5):
+            ProductImage.objects.create(
+                product=product,
+                url=f"https://blob.vercel-storage.com/p/img_{i}.jpg",
+                sort_order=i,
+                is_primary=(i == 0),
+            )
+
+        res = self.client.post(
+            f"/api/products/{product._id}/images",
+            {"url": "https://blob.vercel-storage.com/p/img_sixth.jpg"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json().get("code"), "MAX_IMAGES_EXCEEDED")
+
+    def test_reorder_product_images_rejects_duplicates_and_excess(self):
+        self.client.force_authenticate(user=self.admin)
+        product = Product.objects.create(
+            name="Reorder Phone",
+            brand="Apple",
+            category="Smartphones",
+            description="Test phone",
+            original_price=90000,
+            offer_price=85000,
+            stock=5,
+        )
+        img1 = ProductImage.objects.create(product=product, url="https://blob.vercel-storage.com/p/1.jpg", sort_order=0, is_primary=True)
+        img2 = ProductImage.objects.create(product=product, url="https://blob.vercel-storage.com/p/2.jpg", sort_order=1, is_primary=False)
+
+        # Duplicate ID check
+        res_dup = self.client.put(f"/api/products/{product._id}/images/reorder", {"imageIds": [img1._id, img1._id]}, format="json")
+        self.assertEqual(res_dup.status_code, 400)
+
+        # Excess IDs check (>5)
+        res_excess = self.client.put(f"/api/products/{product._id}/images/reorder", {"imageIds": ["1", "2", "3", "4", "5", "6"]}, format="json")
+        self.assertEqual(res_excess.status_code, 400)
+        self.assertEqual(res_excess.json().get("code"), "MAX_IMAGES_EXCEEDED")
+
     def test_cleanup_orphaned_blobs_dry_run(self):
         session = ProductUploadSession.objects.create(
             user=self.admin,
