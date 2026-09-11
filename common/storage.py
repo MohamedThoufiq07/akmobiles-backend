@@ -76,14 +76,17 @@ def get_blob_token():
     return getattr(settings, "BLOB_READ_WRITE_TOKEN", None) or os.getenv("BLOB_READ_WRITE_TOKEN", "")
 
 
-def generate_staging_key(session_token, item_id=None):
+def generate_staging_key(session_token, item_id=None, canonical_ext=None):
     """
     Generates a secure, temporary staging key:
-    products/staging/<session_uuid>/<item_uuid>.upload
+    products/staging/<session_uuid>/<item_uuid>.<canonical_extension_or_upload>
     """
     safe_session = re.sub(r"[^a-zA-Z0-9_-]", "", str(session_token))[:64] or uuid.uuid4().hex
     item_uuid = item_id or uuid.uuid4().hex
-    return f"products/staging/{safe_session}/{item_uuid}.upload"
+    ext = canonical_ext if canonical_ext else ".upload"
+    if not ext.startswith("."):
+        ext = f".{ext}"
+    return f"products/staging/{safe_session}/{item_uuid}{ext}"
 
 
 def generate_permanent_key(canonical_ext=".jpg"):

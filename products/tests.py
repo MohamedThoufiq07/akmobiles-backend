@@ -413,7 +413,7 @@ class ProductUploadAndSecurityTests(TestCase):
         self.assertTrue(data.get("success"))
         item = data.get("item")
         self.assertTrue(item["storageKey"].startswith(f"products/staging/{token}/"))
-        self.assertTrue(item["storageKey"].endswith(".upload"))
+        self.assertTrue(item["storageKey"].endswith(".jpg"))
         self.assertEqual(item["status"], "uploading")
         self.assertIn("uploadUrl", item)
 

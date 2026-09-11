@@ -465,8 +465,27 @@ def authorize_upload_item(request, token):
                     "request_id": req_id,
                 }, status=400)
 
+            # Determine canonical extension and MIME from filename or contentType
+            content_type_req = (
+                request.data.get("contentType")
+                or request.data.get("content_type")
+                or ""
+            ).lower().strip()
+            _, raw_ext = os.path.splitext(safe_filename)
+            raw_ext = raw_ext.lower()
+
+            if content_type_req == "image/png" or raw_ext == ".png":
+                canonical_ext = ".png"
+                canonical_mime = "image/png"
+            elif content_type_req == "image/webp" or raw_ext == ".webp":
+                canonical_ext = ".webp"
+                canonical_mime = "image/webp"
+            else:
+                canonical_ext = ".jpg"
+                canonical_mime = "image/jpeg"
+
             item_id = uuid.uuid4().hex[:24]
-            staging_key = generate_staging_key(session.token, item_id=item_id)
+            staging_key = generate_staging_key(session.token, item_id=item_id, canonical_ext=canonical_ext)
             blob_token = get_blob_token()
             user_id = str(getattr(request.user, "_id", None) or getattr(request.user, "pk", "") or "")
             is_staff = bool(request.user and request.user.is_staff)
