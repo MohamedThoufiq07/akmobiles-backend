@@ -691,3 +691,181 @@ class ProductUploadAndSecurityTests(TestCase):
 
         call_command("cleanup_orphaned_blobs", dry_run=True)
         self.assertTrue(ProductUploadItem.objects.filter(_id=item._id).exists())
+
+
+class ProductArchiveAndRestoreTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = User.objects.create_superuser(
+            email="admin_archive@example.com",
+            name="Admin Archive",
+            password="adminpassword123",
+            role="admin",
+        )
+        self.regular_user = User.objects.create_user(
+            email="user_archive@example.com",
+            name="Regular User",
+            password="userpassword123",
+        )
+
+        self.p1 = Product.objects.create(
+            name="Alpha Phone",
+            brand="Alpha",
+            category="Smartphones",
+            description="Alpha description",
+            original_price=50000,
+            offer_price=45000,
+            stock=10,
+            is_featured=True,
+            flash_sale=True,
+        )
+        self.p2 = Product.objects.create(
+            name="Beta Phone",
+            brand="Beta",
+            category="Smartphones",
+            description="Beta description",
+            original_price=60000,
+            offer_price=55000,
+            stock=8,
+            is_featured=True,
+        )
+        self.p3 = Product.objects.create(
+            name="Gamma Earbuds",
+            brand="Gamma",
+            category="Earbuds",
+            description="Gamma description",
+            original_price=3000,
+            offer_price=2000,
+            stock=20,
+        )
+
+    def test_non_admin_cannot_bulk_archive_or_restore(self):
+        self.client.force_authenticate(user=self.regular_user)
+        res_arch = self.client.post("/api/products/bulk-archive", {"product_ids": [self.p1._id]}, format="json")
+        self.assertEqual(res_arch.status_code, 403)
+
+        res_rest = self.client.post("/api/products/bulk-restore", {"product_ids": [self.p1._id]}, format="json")
+        self.assertEqual(res_rest.status_code, 403)
+
+    def test_empty_selection_rejected(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post("/api/products/bulk-archive", {"product_ids": []}, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json().get("code"), "EMPTY_SELECTION")
+
+    def test_single_product_soft_delete_and_public_exclusion(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.delete(f"/api/products/{self.p1._id}")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json().get("code"), "PRODUCT_ARCHIVED")
+
+        self.p1.refresh_from_db()
+        self.assertFalse(self.p1.is_active)
+        self.assertIsNotNone(self.p1.archived_at)
+        self.assertEqual(self.p1.archived_by, self.admin)
+        self.assertFalse(self.p1.is_featured)
+        self.assertFalse(self.p1.flash_sale)
+
+        # Public cannot view archived product
+        self.client.logout()
+        res_detail = self.client.get(f"/api/products/{self.p1._id}")
+        self.assertEqual(res_detail.status_code, 404)
+
+        # Public list excludes archived
+        res_list = self.client.get("/api/products/")
+        p_ids = [p["_id"] for p in res_list.json().get("products", [])]
+        self.assertNotIn(self.p1._id, p_ids)
+
+        # Public featured excludes archived
+        res_feat = self.client.get("/api/products/featured")
+        feat_ids = [p["_id"] for p in res_feat.json().get("products", [])]
+        self.assertNotIn(self.p1._id, feat_ids)
+
+    def test_bulk_archive_explicit_ids(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post(
+            "/api/products/bulk-archive",
+            {"product_ids": [self.p1._id, self.p2._id]},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json().get("archived_count"), 2)
+
+        self.p1.refresh_from_db()
+        self.p2.refresh_from_db()
+        self.p3.refresh_from_db()
+        self.assertFalse(self.p1.is_active)
+        self.assertFalse(self.p2.is_active)
+        self.assertTrue(self.p3.is_active)
+
+    def test_bulk_archive_all_filtered_with_exclusion(self):
+        self.client.force_authenticate(user=self.admin)
+        res = self.client.post(
+            "/api/products/bulk-archive",
+            {
+                "selection_mode": "all_filtered",
+                "filters": {"category": "Smartphones"},
+                "excluded_ids": [self.p1._id],
+            },
+            format="json",
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json().get("archived_count"), 1)
+
+        self.p1.refresh_from_db()
+        self.p2.refresh_from_db()
+        self.p3.refresh_from_db()
+        self.assertTrue(self.p1.is_active)  # Excluded
+        self.assertFalse(self.p2.is_active) # Matched & archived
+        self.assertTrue(self.p3.is_active)  # Different category
+
+    def test_restore_single_and_bulk_products(self):
+        self.client.force_authenticate(user=self.admin)
+        # Archive p1 and p2 first
+        self.client.post("/api/products/bulk-archive", {"product_ids": [self.p1._id, self.p2._id]}, format="json")
+
+        # Restore single p1
+        res_single = self.client.put(f"/api/products/{self.p1._id}/restore")
+        self.assertEqual(res_single.status_code, 200)
+        self.assertEqual(res_single.json().get("code"), "PRODUCT_RESTORED")
+        self.p1.refresh_from_db()
+        self.assertTrue(self.p1.is_active)
+        self.assertIsNone(self.p1.archived_at)
+
+        # Restore bulk p2
+        res_bulk = self.client.post("/api/products/bulk-restore", {"product_ids": [self.p2._id]}, format="json")
+        self.assertEqual(res_bulk.status_code, 200)
+        self.assertEqual(res_bulk.json().get("restored_count"), 1)
+        self.p2.refresh_from_db()
+        self.assertTrue(self.p2.is_active)
+
+    def test_admin_status_filter_and_serializers(self):
+        self.client.force_authenticate(user=self.admin)
+        self.client.delete(f"/api/products/{self.p1._id}")
+
+        # Admin query status=archived
+        res_archived = self.client.get("/api/products/?status=archived")
+        self.assertEqual(res_archived.status_code, 200)
+        archived_list = res_archived.json().get("products", [])
+        self.assertEqual(len(archived_list), 1)
+        self.assertEqual(archived_list[0]["_id"], self.p1._id)
+        self.assertIn("isActive", archived_list[0])
+        self.assertFalse(archived_list[0]["isActive"])
+        self.assertIsNotNone(archived_list[0]["archivedAt"])
+        self.assertEqual(archived_list[0]["archivedBy"]["email"], self.admin.email)
+
+        # Admin query status=active
+        res_active = self.client.get("/api/products/?status=active")
+        active_ids = [p["_id"] for p in res_active.json().get("products", [])]
+        self.assertNotIn(self.p1._id, active_ids)
+        self.assertIn(self.p2._id, active_ids)
+
+        # Public query never exposes internal soft delete metadata
+        self.client.logout()
+        res_pub = self.client.get("/api/products/")
+        pub_products = res_pub.json().get("products", [])
+        for p in pub_products:
+            self.assertNotIn("isActive", p)
+            self.assertNotIn("archivedAt", p)
+            self.assertNotIn("archivedBy", p)
+

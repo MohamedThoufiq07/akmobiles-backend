@@ -65,7 +65,15 @@ from .constants import (
     ACCEPTED_IMAGE_FORMATS,
 )
 from .models import Product, ProductImage, ProductUploadSession, ProductUploadItem, Review
-from .serializers import ProductSerializer, ProductImageSerializer
+from .serializers import ProductSerializer, AdminProductSerializer, ProductImageSerializer
+from .services import (
+    archive_single_product,
+    bulk_archive_products,
+    bulk_archive_all_filtered,
+    restore_single_product,
+    bulk_restore_products,
+    bulk_restore_all_filtered,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +209,8 @@ def _sync_product_images(product, images_data, session_token=None):
 @permission_classes([AllowAny])
 def products_root(request):
     """
-    GET:  paginated list with filters, sort, and search.
+    GET:  paginated list with filters, sort, and search (defaults to active products).
+          Admin requests support status=active|archived|all and return AdminProductSerializer.
     POST: admin-only product create.
     """
     if request.method == "POST":
@@ -228,11 +237,24 @@ def products_root(request):
                     _sync_product_images(p, images_data, session_token=session_token)
 
                 p_refreshed = Product.objects.prefetch_related("product_images", "reviews").filter(_id=p._id).first()
-                return Response({"success": True, "product": ProductSerializer(p_refreshed).data}, status=201)
+                return Response({"success": True, "product": AdminProductSerializer(p_refreshed).data}, status=201)
             return Response({"success": False, "errors": serializer.errors}, status=400)
 
     q = request.GET
-    qs = Product.objects.all().prefetch_related("product_images", "reviews")
+    is_admin_req = _is_admin(request)
+    status_filter = (q.get("status") or "active").lower()
+
+    if is_admin_req:
+        if status_filter == "archived":
+            qs = Product.objects.filter(is_active=False)
+        elif status_filter == "all":
+            qs = Product.objects.all()
+        else:
+            qs = Product.objects.filter(is_active=True)
+    else:
+        qs = Product.objects.filter(is_active=True)
+
+    qs = qs.prefetch_related("product_images", "reviews")
 
     brand = q.get("brand")
     if brand:
@@ -244,9 +266,15 @@ def products_root(request):
 
     min_p, max_p = q.get("minPrice"), q.get("maxPrice")
     if min_p is not None and min_p != "":
-        qs = qs.filter(offer_price__gte=float(min_p))
+        try:
+            qs = qs.filter(offer_price__gte=float(min_p))
+        except (ValueError, TypeError):
+            pass
     if max_p is not None and max_p != "":
-        qs = qs.filter(offer_price__lte=float(max_p))
+        try:
+            qs = qs.filter(offer_price__lte=float(max_p))
+        except (ValueError, TypeError):
+            pass
 
     ram = q.get("ram")
     if ram:
@@ -258,11 +286,17 @@ def products_root(request):
 
     rating = q.get("rating")
     if rating:
-        qs = qs.filter(rating__gte=float(rating))
+        try:
+            qs = qs.filter(rating__gte=float(rating))
+        except (ValueError, TypeError):
+            pass
 
     discount = q.get("discount")
     if discount:
-        qs = qs.filter(discount__gte=float(discount))
+        try:
+            qs = qs.filter(discount__gte=float(discount))
+        except (ValueError, TypeError):
+            pass
 
     if q.get("flashSale") == "true":
         qs = qs.filter(flash_sale=True)
@@ -295,9 +329,10 @@ def products_root(request):
         qs = qs.order_by(SORT_MAP.get(q.get("sort"), "-created_at"))
 
     items, page, pages, total = paginate_queryset(qs, q.get("page", 1), q.get("limit", 12))
+    serializer_class = AdminProductSerializer if is_admin_req else ProductSerializer
     return Response({
         "success": True,
-        "products": ProductSerializer(items, many=True).data,
+        "products": serializer_class(items, many=True).data,
         "page": page,
         "pages": pages,
         "total": total,
@@ -307,25 +342,26 @@ def products_root(request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_featured(request):
-    products = Product.objects.filter(is_featured=True).prefetch_related("product_images", "reviews")[:8]
+    products = Product.objects.filter(is_active=True, is_featured=True).prefetch_related("product_images", "reviews")[:8]
     return Response({"success": True, "products": ProductSerializer(products, many=True).data})
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_top(request):
-    products = Product.objects.order_by("-rating").prefetch_related("product_images", "reviews")[:8]
+    products = Product.objects.filter(is_active=True).order_by("-rating").prefetch_related("product_images", "reviews")[:8]
     return Response({"success": True, "products": ProductSerializer(products, many=True).data})
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_related(request, product_id):
-    product = Product.objects.filter(_id=product_id).first()
+    product = Product.objects.filter(_id=product_id, is_active=True).first()
     if not product:
         return Response({"success": False, "message": "Product not found"}, status=404)
     related = (
-        Product.objects.filter(Q(brand=product.brand) | Q(category=product.category))
+        Product.objects.filter(is_active=True)
+        .filter(Q(brand=product.brand) | Q(category=product.category))
         .exclude(_id=product._id)
         .prefetch_related("product_images", "reviews")[:5]
     )
@@ -335,14 +371,16 @@ def get_related(request, product_id):
 @api_view(["GET", "PUT", "DELETE"])
 def product_detail(request, product_id):
     product = Product.objects.filter(_id=product_id).prefetch_related("product_images", "reviews").first()
+    is_admin_req = _is_admin(request)
 
     if request.method == "GET":
-        if not product:
+        if not product or (not product.is_active and not is_admin_req):
             return Response({"success": False, "message": "Product not found"}, status=404)
-        return Response({"success": True, "product": ProductSerializer(product).data})
+        serializer_class = AdminProductSerializer if is_admin_req else ProductSerializer
+        return Response({"success": True, "product": serializer_class(product).data})
 
     # PUT / DELETE require admin
-    if not _is_admin(request):
+    if not is_admin_req:
         return Response(
             {"success": False, "message": "Access denied. Admin privileges required."}, status=403
         )
@@ -350,9 +388,12 @@ def product_detail(request, product_id):
         return Response({"success": False, "message": "Product not found"}, status=404)
 
     if request.method == "DELETE":
-        with transaction.atomic():
-            product.delete()
-        return Response({"success": True, "message": "Product deleted"})
+        archive_single_product(product, user=request.user)
+        return Response({
+            "success": True,
+            "code": "PRODUCT_ARCHIVED",
+            "message": f'"{product.name}" was archived successfully.',
+        })
 
     images_data = request.data.get("images")
     if images_data is not None and isinstance(images_data, list):
@@ -375,7 +416,89 @@ def product_detail(request, product_id):
 
     product.refresh_from_db()
     product_refreshed = Product.objects.prefetch_related("product_images", "reviews").filter(_id=product._id).first()
-    return Response({"success": True, "product": ProductSerializer(product_refreshed).data})
+    return Response({"success": True, "product": AdminProductSerializer(product_refreshed).data})
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated, IsAdmin])
+def restore_product(request, product_id):
+    """
+    PUT /api/products/<product_id>/restore/
+    Admin-only endpoint to restore a single archived product from Trash.
+    """
+    product = Product.objects.filter(_id=product_id).first()
+    if not product:
+        return Response({"success": False, "message": "Product not found"}, status=404)
+
+    restore_single_product(product)
+    product.refresh_from_db()
+    product_refreshed = Product.objects.prefetch_related("product_images", "reviews").filter(_id=product._id).first()
+    return Response({
+        "success": True,
+        "code": "PRODUCT_RESTORED",
+        "message": f'"{product.name}" was restored successfully.',
+        "product": AdminProductSerializer(product_refreshed).data,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, IsAdmin])
+def bulk_archive_products_view(request):
+    """
+    POST /api/products/bulk-archive/
+    Admin-only endpoint to bulk-archive products safely by IDs or filtered selection.
+    """
+    selection_mode = request.data.get("selection_mode") or request.data.get("selectionMode")
+    filters = request.data.get("filters")
+    excluded_ids = request.data.get("excluded_ids") or request.data.get("excludedIds") or []
+    product_ids = request.data.get("product_ids") or request.data.get("productIds")
+
+    if selection_mode == "all_filtered":
+        count = bulk_archive_all_filtered(filters=filters, excluded_ids=excluded_ids, user=request.user)
+    else:
+        if not product_ids or not isinstance(product_ids, list):
+            return Response({
+                "code": "EMPTY_SELECTION",
+                "message": "Please select at least one product to archive.",
+            }, status=400)
+        count = bulk_archive_products(product_ids, user=request.user)
+
+    return Response({
+        "success": True,
+        "code": "PRODUCTS_ARCHIVED",
+        "archived_count": count,
+        "message": f"{count} product{'s' if count != 1 else ''} {'were' if count != 1 else 'was'} archived successfully.",
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, IsAdmin])
+def bulk_restore_products_view(request):
+    """
+    POST /api/products/bulk-restore/
+    Admin-only endpoint to bulk-restore products from Trash.
+    """
+    selection_mode = request.data.get("selection_mode") or request.data.get("selectionMode")
+    filters = request.data.get("filters")
+    excluded_ids = request.data.get("excluded_ids") or request.data.get("excludedIds") or []
+    product_ids = request.data.get("product_ids") or request.data.get("productIds")
+
+    if selection_mode == "all_filtered":
+        count = bulk_restore_all_filtered(filters=filters, excluded_ids=excluded_ids)
+    else:
+        if not product_ids or not isinstance(product_ids, list):
+            return Response({
+                "code": "EMPTY_SELECTION",
+                "message": "Please select at least one product to restore.",
+            }, status=400)
+        count = bulk_restore_products(product_ids)
+
+    return Response({
+        "success": True,
+        "code": "PRODUCTS_RESTORED",
+        "restored_count": count,
+        "message": f"{count} product{'s' if count != 1 else ''} {'were' if count != 1 else 'was'} restored successfully.",
+    })
 
 
 @api_view(["POST"])

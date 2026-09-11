@@ -161,6 +161,30 @@ class ProductSerializer(serializers.ModelSerializer):
         return ret
 
 
+class AdminProductSerializer(ProductSerializer):
+    """
+    Admin-only serializer containing soft-delete audit fields.
+    Never used in public storefront endpoints.
+    """
+    isActive = serializers.BooleanField(source="is_active", read_only=True)
+    archivedAt = serializers.DateTimeField(source="archived_at", read_only=True)
+    archivedBy = serializers.SerializerMethodField()
+
+    class Meta(ProductSerializer.Meta):
+        fields = ProductSerializer.Meta.fields + [
+            "isActive", "archivedAt", "archivedBy",
+        ]
+
+    def get_archivedBy(self, obj):
+        if obj.archived_by:
+            return {
+                "_id": str(getattr(obj.archived_by, "_id", None) or getattr(obj.archived_by, "pk", "")),
+                "name": getattr(obj.archived_by, "name", ""),
+                "email": getattr(obj.archived_by, "email", ""),
+            }
+        return None
+
+
 class TopProductSerializer(serializers.ModelSerializer):
     """Trimmed shape for /admin/reports/top-products."""
     primaryImage = serializers.SerializerMethodField()

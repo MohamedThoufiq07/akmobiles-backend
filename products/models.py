@@ -13,6 +13,7 @@ ProductImage:
 
 from decimal import Decimal
 import secrets
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -62,6 +63,16 @@ class Product(models.Model):
     flash_sale = models.BooleanField(default=False)
     num_sold = models.IntegerField(default=0)
 
+    is_active = models.BooleanField(default=True, db_index=True)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    archived_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="archived_products",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -78,6 +89,8 @@ class Product(models.Model):
             models.Index(fields=["-created_at"]),
             models.Index(fields=["is_featured"]),
             models.Index(fields=["flash_sale"]),
+            models.Index(fields=["is_active"]),
+            models.Index(fields=["archived_at"]),
         ]
 
     def save(self, *args, **kwargs):

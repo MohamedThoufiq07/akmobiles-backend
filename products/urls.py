@@ -4,6 +4,8 @@ from . import views
 # Specific routes before the <id> catch-all (same precedence as Express).
 urlpatterns = [
     path("", views.products_root),                                        # GET list / POST create
+    path("/bulk-archive", views.bulk_archive_products_view),              # POST bulk archive
+    path("/bulk-restore", views.bulk_restore_products_view),              # POST bulk restore
     path("/upload-session", views.create_upload_session),                 # POST create upload session
     path("/upload-session/<str:token>/authorize-upload", views.authorize_upload_item), # POST authorize direct upload
     path("/upload-session/<str:token>/stage-local/<str:item_id>", views.stage_local_upload_item), # PUT local stage
@@ -16,6 +18,7 @@ urlpatterns = [
     path("/<str:product_id>/images/<str:image_id>/primary", views.set_primary_product_image), # PUT set primary
     path("/<str:product_id>/images/<str:image_id>", views.delete_product_image), # DELETE product image
     path("/<str:product_id>/images", views.add_product_image),            # POST add product image
+    path("/<str:product_id>/restore", views.restore_product),             # PUT restore product
     path("/<str:product_id>/related", views.get_related),
     path("/<str:product_id>/reviews", views.create_review),
     path("/<str:product_id>", views.product_detail),                      # GET / PUT / DELETE
