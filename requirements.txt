@@ -13,3 +13,4 @@ razorpay==1.4.2
 # razorpay 1.4.2 imports pkg_resources, which setuptools removed in 81+.
 # Python 3.12+ no longer bundles setuptools, so pin a version that still ships it.
 setuptools<81
+Pillow>=10.0.0

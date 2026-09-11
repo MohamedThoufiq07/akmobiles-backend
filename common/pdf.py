@@ -12,7 +12,12 @@ def generate_invoice_pdf(order) -> bytes:
     buffer = io.BytesIO()
     
     order_id = str(order._id)
-    created_at = order.created_at.strftime("%d %B %Y") if order.created_at else "N/A"
+    if order.created_at:
+        from django.utils import timezone
+        local_dt = timezone.localtime(order.created_at) if timezone.is_aware(order.created_at) else order.created_at
+        created_at = local_dt.strftime("%d %b %Y, %I:%M %p IST")
+    else:
+        created_at = "N/A"
     ship = order.shipping_address or {}
     customer_name = ship.get("name") or (order.user.name if hasattr(order, "user") and order.user else "Customer")
     phone = ship.get("phone", "")

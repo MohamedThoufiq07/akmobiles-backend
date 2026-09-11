@@ -231,22 +231,21 @@ def top_products(request):
 @permission_classes([IsAuthenticated, IsAdmin])
 @parser_classes([MultiPartParser])
 def upload_image(request):
-    file = request.FILES.get("image")
+    file = request.FILES.get("image") or request.FILES.get("file")
     if not file:
         return Response({"success": False, "message": "No image file provided."}, status=400)
-    if not file.content_type.startswith("image/"):
-        return Response({"success": False, "message": "Only image files are allowed."}, status=400)
-    if file.size > 5 * 1024 * 1024:
-        return Response({"success": False, "message": "File too large (max 5MB)."}, status=400)
 
-    # Save via Django's default storage: Cloudinary in prod (returns an absolute
-    # https URL), local FileSystemStorage in dev (returns a relative /uploads/...
-    # path). Same response contract { success, url } either way.
-    ext = os.path.splitext(file.name)[1].lower()
-    filename = f"product-{int(time.time() * 1000)}-{random.randint(0, 10**9)}{ext}"
-    saved_name = default_storage.save(filename, file)
-    url = default_storage.url(saved_name)
-    # Dev (local FS) returns a relative path — keep the previous absolute-URL shape.
-    if url.startswith("/"):
-        url = request.build_absolute_uri(url)
-    return Response({"success": True, "url": url}, status=201)
+    from common.storage import upload_to_blob_or_storage
+    try:
+        result = upload_to_blob_or_storage(file, request=request)
+        return Response({
+            "success": True,
+            "url": result["url"],
+            "storage_key": result["storage_key"],
+            "content_type": result["content_type"],
+            "file_size": result["file_size"],
+        }, status=201)
+    except ValueError as val_err:
+        return Response({"success": False, "message": str(val_err)}, status=400)
+    except Exception as exc:
+        return Response({"success": False, "message": "Failed to upload image."}, status=500)
