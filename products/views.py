@@ -34,8 +34,15 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+import base64
+import hashlib
+import hmac
+import json
 import logging
+import os
+import time
 import uuid
+from django.conf import settings
 from common.permissions import IsAdmin, paginate_queryset
 from common.storage import (
     generate_staging_key,
@@ -61,6 +68,26 @@ from .models import Product, ProductImage, ProductUploadSession, ProductUploadIt
 from .serializers import ProductSerializer, ProductImageSerializer
 
 logger = logging.getLogger(__name__)
+
+
+def generate_upload_grant(item_id, session_token, user_id, is_staff, pathname, expires_in=300):
+    grant_payload = {
+        "staged_item_id": str(item_id),
+        "session_token": str(session_token),
+        "user_id": str(user_id) if user_id else "",
+        "is_staff": bool(is_staff),
+        "pathname": str(pathname),
+        "exp": int(time.time()) + expires_in,
+        "allowed_types": ["image/jpeg", "image/png", "image/webp"],
+        "max_size": MAX_PRODUCT_IMAGE_BYTES,
+    }
+    blob_token = os.environ.get("BLOB_READ_WRITE_TOKEN", "").strip()
+    secret = os.environ.get("UPLOAD_GRANT_SECRET", "").strip() or blob_token or settings.SECRET_KEY
+    payload_json = json.dumps(grant_payload, separators=(',', ':'), sort_keys=True)
+    payload_b64 = base64.urlsafe_b64encode(payload_json.encode('utf-8')).decode('utf-8').rstrip('=')
+    sig = hmac.new(secret.encode('utf-8'), payload_b64.encode('utf-8'), hashlib.sha256).hexdigest()
+    return f"{payload_b64}.{sig}"
+
 
 SORT_MAP = {
     "price_low": "offer_price",
@@ -407,76 +434,91 @@ def authorize_upload_item(request, token):
     Enforces maximum 5 product images under concurrency locking.
     """
     req_id = uuid.uuid4().hex
-    with transaction.atomic():
-        session = ProductUploadSession.objects.select_for_update().filter(token=token, status="active").first()
-        if not session or not session.is_valid():
+    try:
+        with transaction.atomic():
+            session = ProductUploadSession.objects.select_for_update().filter(token=token, status="active").first()
+            if not session or not session.is_valid():
+                return Response({
+                    "code": "SESSION_EXPIRED",
+                    "message": "Upload session expired or invalid.",
+                    "request_id": req_id,
+                }, status=409)
+
+            raw_filename = (
+                request.data.get("filename")
+                or request.data.get("fileName")
+                or "image.jpg"
+            ).strip()
+            safe_filename = raw_filename[:255]
+
+            # Calculate total active staged items + target product images
+            staged_count = session.items.select_for_update().filter(is_committed=False).count()
+            product_images_count = 0
+            if session.product:
+                product_images_count = session.product.product_images.select_for_update().count()
+
+            if staged_count + product_images_count >= MAX_PRODUCT_IMAGES:
+                return Response({
+                    "code": "MAX_IMAGES_EXCEEDED",
+                    "message": f"A product can contain a maximum of {MAX_PRODUCT_IMAGES} images.",
+                    "file_name": safe_filename,
+                    "request_id": req_id,
+                }, status=400)
+
+            item_id = uuid.uuid4().hex[:24]
+            staging_key = generate_staging_key(session.token, item_id=item_id)
+            blob_token = get_blob_token()
+            user_id = str(getattr(request.user, "_id", None) or getattr(request.user, "pk", "") or "")
+            is_staff = bool(request.user and request.user.is_staff)
+            upload_grant = generate_upload_grant(
+                item_id=item_id,
+                session_token=session.token,
+                user_id=user_id,
+                is_staff=is_staff,
+                pathname=staging_key,
+            )
+
+            upload_mode = "blob" if blob_token else "local"
+            local_stage_url = (
+                request.build_absolute_uri(f"/api/products/upload-session/{token}/stage-local/{item_id}")
+                if not blob_token
+                else None
+            )
+
+            item = ProductUploadItem.objects.create(
+                _id=item_id,
+                session=session,
+                url=local_stage_url or "",
+                storage_key=staging_key,
+                filename=safe_filename,
+                content_type="application/octet-stream",
+                is_committed=False,
+            )
+
             return Response({
-                "code": "SESSION_EXPIRED",
-                "message": "Upload session expired or invalid.",
-                "request_id": req_id,
-            }, status=409)
-
-        raw_filename = (request.data.get("filename") or "image.jpg").strip()
-        safe_filename = raw_filename[:255]
-
-        # Calculate total active staged items + target product images
-        staged_count = session.items.select_for_update().filter(is_committed=False).count()
-        product_images_count = 0
-        if session.product:
-            product_images_count = session.product.product_images.select_for_update().count()
-
-        if staged_count + product_images_count >= MAX_PRODUCT_IMAGES:
-            return Response({
-                "code": "MAX_IMAGES_EXCEEDED",
-                "message": f"A product can contain a maximum of {MAX_PRODUCT_IMAGES} images.",
-                "file_name": safe_filename,
-                "request_id": req_id,
-            }, status=400)
-
-        item_id = uuid.uuid4().hex[:24]
-        staging_key = generate_staging_key(session.token, item_id=item_id)
-        blob_token = get_blob_token()
-
-        if blob_token:
-            upload_url = f"https://blob.vercel-storage.com/{staging_key}"
-            headers = {
-                "Authorization": f"Bearer {blob_token}",
-                "x-api-version": "7",
-                "x-content-type": "application/octet-stream",
-                "x-access": "public",
-                "x-add-random-suffix": "0",
-            }
-            upload_method = "PUT"
-        else:
-            upload_url = request.build_absolute_uri(f"/api/products/upload-session/{token}/stage-local/{item_id}")
-            headers = {}
-            upload_method = "PUT"
-
-        item = ProductUploadItem.objects.create(
-            _id=item_id,
-            session=session,
-            url=upload_url,
-            storage_key=staging_key,
-            filename=safe_filename,
-            content_type="application/octet-stream",
-            is_committed=False,
-        )
-
+                "success": True,
+                "mode": upload_mode,
+                "pathname": staging_key,
+                "stagedItemId": item._id,
+                "stagingKey": staging_key,
+                "uploadGrant": upload_grant,
+                "uploadUrl": local_stage_url or staging_key,
+                "handleUploadUrl": "/api/product-image-upload",
+                "item": {
+                    "id": item._id,
+                    "storageKey": staging_key,
+                    "uploadUrl": local_stage_url or staging_key,
+                    "filename": safe_filename,
+                    "status": "uploading",
+                },
+            }, status=201)
+    except Exception as exc:
+        logger.exception("[%s] Unexpected error in authorize_upload_item: %s", req_id, exc)
         return Response({
-            "success": True,
-            "uploadUrl": upload_url,
-            "uploadMethod": upload_method,
-            "headers": headers,
-            "stagedItemId": item._id,
-            "stagingKey": staging_key,
-            "item": {
-                "id": item._id,
-                "storageKey": staging_key,
-                "uploadUrl": upload_url,
-                "filename": safe_filename,
-                "status": "uploading",
-            },
-        }, status=201)
+            "code": "INTERNAL_ERROR",
+            "message": str(exc),
+            "request_id": req_id,
+        }, status=500)
 
 
 @api_view(["PUT", "POST"])
@@ -543,6 +585,26 @@ def finalize_upload_item(request, token):
             "message": "Staged upload item not found in session.",
             "request_id": req_id,
         }, status=400)
+
+    blob_url = (
+        request.data.get("blobUrl")
+        or request.data.get("blob_url")
+        or request.data.get("url")
+        or ""
+    ).strip()
+    blob_pathname = (
+        request.data.get("blobPathname")
+        or request.data.get("blob_pathname")
+        or request.data.get("pathname")
+        or ""
+    ).strip()
+
+    if blob_url:
+        item.url = blob_url
+    if blob_pathname and blob_pathname.startswith("products/"):
+        item.storage_key = blob_pathname
+    if blob_url or blob_pathname:
+        item.save(update_fields=["url", "storage_key"])
 
     # Idempotent replay
     if not item.storage_key.startswith("products/staging/"):
