@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "orders",
     "payments",
     "core",
+    "shipping",
 ]
 
 MIDDLEWARE = [
@@ -214,3 +215,14 @@ RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
 
+
+SHIPROCKET_API_EMAIL = os.getenv("SHIPROCKET_API_EMAIL", "")
+SHIPROCKET_API_PASSWORD = os.getenv("SHIPROCKET_API_PASSWORD", "")
+SHIPROCKET_PICKUP_LOCATION = os.getenv(
+    "SHIPROCKET_PICKUP_LOCATION",
+    "work",
+)
+SHIPROCKET_API_BASE_URL = os.getenv(
+    "SHIPROCKET_API_BASE_URL",
+    "https://apiv2.shiprocket.in",
+)
