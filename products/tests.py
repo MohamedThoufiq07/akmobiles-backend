@@ -869,3 +869,454 @@ class ProductArchiveAndRestoreTests(TestCase):
             self.assertNotIn("archivedAt", p)
             self.assertNotIn("archivedBy", p)
 
+
+class ProductReviewEligibilityTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(
+            email="customer1@example.com", password="Password123!", name="Customer One"
+        )
+        self.user2 = User.objects.create_user(
+            email="customer2@example.com", password="Password123!", name="Customer Two"
+        )
+        self.admin = User.objects.create_user(
+            email="admin@example.com", password="Password123!", name="Admin User", role="admin"
+        )
+
+        self.product = Product.objects.create(
+            name="Pixel 8",
+            brand="Google",
+            category="Smartphones",
+            description="Google flagship phone.",
+            original_price=75000.0,
+            offer_price=69999.0,
+            stock=10,
+            is_active=True,
+        )
+
+        self.other_product = Product.objects.create(
+            name="Galaxy S24",
+            brand="Samsung",
+            category="Smartphones",
+            description="Samsung flagship phone.",
+            original_price=80000.0,
+            offer_price=74999.0,
+            stock=5,
+            is_active=True,
+        )
+
+    def _create_delivered_razorpay_order(self, user, product):
+        from orders.models import Order
+        from payments.models import Payment
+        order = Order.objects.create(
+            user=user,
+            order_items=[{
+                "product": str(product._id),
+                "name": product.name,
+                "price": product.offer_price,
+                "quantity": 1,
+            }],
+            total_price=product.offer_price,
+            order_status="Delivered",
+            payment_info={"method": "Razorpay", "status": "Completed"},
+        )
+        Payment.objects.create(
+            order=order,
+            user=user,
+            razorpay_order_id=f"order_rzp_{order._id}",
+            razorpay_payment_id=f"pay_rzp_{order._id}",
+            status="Completed",
+            stock_reduced=True,
+        )
+        return order
+
+    def _create_delivered_cod_order(self, user, product):
+        from orders.models import Order
+        return Order.objects.create(
+            user=user,
+            order_items=[{
+                "product": str(product._id),
+                "name": product.name,
+                "price": product.offer_price,
+                "quantity": 1,
+            }],
+            total_price=product.offer_price,
+            order_status="Delivered",
+            payment_info={"method": "COD", "status": "Pending"},
+        )
+
+    def test_anonymous_can_list_published_reviews(self):
+        from products.models import Review
+        Review.objects.create(
+            product=self.product,
+            user=self.user1,
+            name="Customer One",
+            rating=5,
+            title="Great phone",
+            comment="Awesome battery life.",
+            is_verified_purchase=True,
+            is_published=True,
+        )
+        self.product.recalculate_rating()
+
+        res = self.client.get(f"/api/products/{self.product._id}/reviews")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["summary"]["reviewCount"], 1)
+        self.assertEqual(data["summary"]["averageRating"], 5.0)
+        self.assertEqual(data["summary"]["distribution"]["5"], 1)
+        self.assertEqual(len(data["results"]), 1)
+        self.assertEqual(data["results"][0]["name"], "Customer One")
+        self.assertEqual(data["results"][0]["avatarInitial"], "C")
+        self.assertTrue(data["results"][0]["isVerifiedPurchase"])
+        self.assertFalse(data["results"][0]["canEdit"])
+
+    def test_logged_out_cannot_create_review(self):
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Nice phone"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 401)
+        self.assertEqual(res.json().get("code"), "AUTHENTICATION_REQUIRED")
+
+    def test_logged_in_without_order_cannot_review(self):
+        self.client.force_authenticate(user=self.user1)
+
+        # Eligibility check
+        elig = self.client.get(f"/api/products/{self.product._id}/reviews/eligibility")
+        self.assertEqual(elig.status_code, 200)
+        self.assertFalse(elig.json()["canReview"])
+        self.assertEqual(elig.json()["reason"], "PURCHASE_REQUIRED")
+
+        # POST submission attempt
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Tried to review without buying"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "PURCHASE_REQUIRED")
+
+    def test_cannot_use_another_users_order(self):
+        # user2 bought the product, user1 tries to review it
+        self._create_delivered_razorpay_order(self.user2, self.product)
+
+        self.client.force_authenticate(user=self.user1)
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 4, "comment": "Reviewing user2's purchase"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "PURCHASE_REQUIRED")
+
+    def test_loose_product_name_matching_cannot_qualify(self):
+        from orders.models import Order
+        # Order with name "Pixel 8" but pointing to other_product._id
+        Order.objects.create(
+            user=self.user1,
+            order_items=[{
+                "product": str(self.other_product._id),
+                "name": "Pixel 8",
+                "price": 69999.0,
+                "quantity": 1,
+            }],
+            total_price=69999.0,
+            order_status="Delivered",
+            payment_info={"method": "COD", "status": "Pending"},
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Name matched but ID differed"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "PURCHASE_REQUIRED")
+
+    def test_pending_and_undelivered_orders_cannot_qualify(self):
+        from orders.models import Order
+        Order.objects.create(
+            user=self.user1,
+            order_items=[{"product": str(self.product._id), "quantity": 1}],
+            total_price=self.product.offer_price,
+            order_status="Processing",
+            payment_info={"method": "COD", "status": "Pending"},
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        elig = self.client.get(f"/api/products/{self.product._id}/reviews/eligibility")
+        self.assertEqual(elig.json()["reason"], "ORDER_NOT_DELIVERED")
+
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Not delivered yet"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "ORDER_NOT_DELIVERED")
+
+    def test_cancelled_order_cannot_qualify(self):
+        from orders.models import Order
+        Order.objects.create(
+            user=self.user1,
+            order_items=[{"product": str(self.product._id), "quantity": 1}],
+            total_price=self.product.offer_price,
+            order_status="Cancelled",
+            payment_info={"method": "COD", "status": "Pending"},
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Order was cancelled"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "ORDER_NOT_DELIVERED")
+
+    def test_failed_razorpay_payment_cannot_qualify(self):
+        from orders.models import Order
+        from payments.models import Payment
+        order = Order.objects.create(
+            user=self.user1,
+            order_items=[{"product": str(self.product._id), "quantity": 1}],
+            total_price=self.product.offer_price,
+            order_status="Delivered",
+            payment_info={"method": "Razorpay", "status": "Failed"},
+        )
+        Payment.objects.create(
+            order=order,
+            user=self.user1,
+            status="Failed",
+        )
+
+        self.client.force_authenticate(user=self.user1)
+        elig = self.client.get(f"/api/products/{self.product._id}/reviews/eligibility")
+        self.assertEqual(elig.json()["reason"], "PAYMENT_NOT_VERIFIED")
+
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Payment failed"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.json().get("code"), "PAYMENT_NOT_VERIFIED")
+
+    def test_completed_razorpay_payment_plus_delivered_qualifies(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+
+        self.client.force_authenticate(user=self.user1)
+
+        # Eligibility check
+        elig = self.client.get(f"/api/products/{self.product._id}/reviews/eligibility")
+        self.assertTrue(elig.json()["canReview"])
+        self.assertEqual(elig.json()["reason"], "ELIGIBLE")
+        self.assertTrue(elig.json()["isVerifiedPurchase"])
+
+        # Post review
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "title": "Superb Pixel", "comment": "Clean Android, amazing camera."},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 201)
+        data = res.json()
+        self.assertTrue(data["success"])
+        self.assertTrue(data["review"]["isVerifiedPurchase"])
+        self.assertEqual(data["review"]["title"], "Superb Pixel")
+
+        # Recalculated product rating
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.num_reviews, 1)
+        self.assertEqual(self.product.rating, 5.0)
+
+    def test_delivered_cod_order_qualifies(self):
+        self._create_delivered_cod_order(self.user1, self.product)
+
+        self.client.force_authenticate(user=self.user1)
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 4, "title": "COD Delivery", "comment": "Paid cash on delivery, works great."},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 201)
+        self.assertTrue(res.json()["review"]["isVerifiedPurchase"])
+
+    def test_archived_inactive_product_rejects_reviews(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.product.is_active = False
+        self.product.save()
+
+        self.client.force_authenticate(user=self.user1)
+        elig = self.client.get(f"/api/products/{self.product._id}/reviews/eligibility")
+        self.assertEqual(elig.json()["reason"], "PRODUCT_INACTIVE")
+
+        res = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Reviewing archived phone"},
+            format="json",
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.json().get("code"), "PRODUCT_INACTIVE")
+
+    def test_duplicate_review_returns_409(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+
+        # First review succeeds
+        res1 = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "First review"},
+            format="json",
+        )
+        self.assertEqual(res1.status_code, 201)
+
+        # Second review returns 409
+        res2 = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 4, "comment": "Second review attempt"},
+            format="json",
+        )
+        self.assertEqual(res2.status_code, 409)
+        self.assertEqual(res2.json().get("code"), "REVIEW_ALREADY_EXISTS")
+
+    def test_rating_and_comment_validation(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+
+        # Rating < 1
+        res_low = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 0, "comment": "Too low"},
+            format="json",
+        )
+        self.assertEqual(res_low.status_code, 400)
+
+        # Rating > 5
+        res_high = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 6, "comment": "Too high"},
+            format="json",
+        )
+        self.assertEqual(res_high.status_code, 400)
+
+        # Blank comment
+        res_blank = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "   "},
+            format="json",
+        )
+        self.assertEqual(res_blank.status_code, 400)
+
+    def test_user_can_edit_own_review(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+
+        res_create = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 4, "title": "Initial", "comment": "Initial review"},
+            format="json",
+        )
+        review_id = res_create.json()["review"]["_id"]
+
+        # Update review
+        res_update = self.client.put(
+            f"/api/products/{self.product._id}/reviews/{review_id}",
+            {"rating": 5, "title": "Updated", "comment": "Updated after 1 month"},
+            format="json",
+        )
+        self.assertEqual(res_update.status_code, 200)
+        self.assertEqual(res_update.json()["review"]["rating"], 5)
+        self.assertEqual(res_update.json()["review"]["title"], "Updated")
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.rating, 5.0)
+
+    def test_other_user_cannot_edit_or_delete_review(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+
+        res_create = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "User1 review"},
+            format="json",
+        )
+        review_id = res_create.json()["review"]["_id"]
+
+        # User2 tries to edit
+        self.client.force_authenticate(user=self.user2)
+        res_edit = self.client.put(
+            f"/api/products/{self.product._id}/reviews/{review_id}",
+            {"rating": 1, "comment": "Hacked review"},
+            format="json",
+        )
+        self.assertEqual(res_edit.status_code, 403)
+        self.assertEqual(res_edit.json().get("code"), "REVIEW_PERMISSION_DENIED")
+
+        # User2 tries to delete
+        res_del = self.client.delete(f"/api/products/{self.product._id}/reviews/{review_id}")
+        self.assertEqual(res_del.status_code, 403)
+
+    def test_delete_review_recalculates_rating(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+
+        res_create = self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "User1 review"},
+            format="json",
+        )
+        review_id = res_create.json()["review"]["_id"]
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.num_reviews, 1)
+
+        # Delete review
+        res_del = self.client.delete(f"/api/products/{self.product._id}/reviews/{review_id}")
+        self.assertEqual(res_del.status_code, 200)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.num_reviews, 0)
+        self.assertEqual(self.product.rating, 0.0)
+
+    def test_hidden_reviews_do_not_affect_public_aggregates(self):
+        from products.models import Review
+        r = Review.objects.create(
+            product=self.product,
+            user=self.user1,
+            name="Customer One",
+            rating=1,
+            comment="Hidden offensive comment",
+            is_verified_purchase=True,
+            is_published=False,
+        )
+        self.product.recalculate_rating()
+
+        res = self.client.get(f"/api/products/{self.product._id}/reviews")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json()["summary"]["reviewCount"], 0)
+        self.assertEqual(res.json()["summary"]["averageRating"], 0.0)
+        self.assertEqual(len(res.json()["results"]), 0)
+
+    def test_public_response_contains_no_private_fields(self):
+        self._create_delivered_razorpay_order(self.user1, self.product)
+        self.client.force_authenticate(user=self.user1)
+        self.client.post(
+            f"/api/products/{self.product._id}/reviews",
+            {"rating": 5, "comment": "Checking public leak safety"},
+            format="json",
+        )
+
+        self.client.logout()
+        res = self.client.get(f"/api/products/{self.product._id}/reviews")
+        self.assertEqual(res.status_code, 200)
+        review_item = res.json()["results"][0]
+
+        self.assertNotIn("email", review_item)
+        self.assertNotIn("phone", review_item)
+        self.assertNotIn("orderId", review_item)
+        self.assertNotIn("paymentId", review_item)
+        self.assertNotIn("user", review_item)

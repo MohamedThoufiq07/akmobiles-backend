@@ -20,6 +20,11 @@ urlpatterns = [
     path("/<str:product_id>/images", views.add_product_image),            # POST add product image
     path("/<str:product_id>/restore", views.restore_product),             # PUT restore product
     path("/<str:product_id>/related", views.get_related),
-    path("/<str:product_id>/reviews", views.create_review),
+    path("/<str:product_id>/reviews/eligibility", views.get_review_eligibility),
+    path("/<str:product_id>/reviews/eligibility/", views.get_review_eligibility),
+    path("/<str:product_id>/reviews/<str:review_id>", views.product_review_detail),
+    path("/<str:product_id>/reviews/<str:review_id>/", views.product_review_detail),
+    path("/<str:product_id>/reviews", views.product_reviews),
+    path("/<str:product_id>/reviews/", views.product_reviews),
     path("/<str:product_id>", views.product_detail),                      # GET / PUT / DELETE
 ]

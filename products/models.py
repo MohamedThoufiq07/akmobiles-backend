@@ -157,10 +157,16 @@ class ProductImage(models.Model):
 class Review(models.Model):
     _id = models.CharField(primary_key=True, max_length=24, default=generate_object_id, editable=False)
     product = models.ForeignKey(Product, related_name="reviews", on_delete=models.CASCADE)
-    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE)
+    user = models.ForeignKey("accounts.User", related_name="reviews", on_delete=models.CASCADE)
+    qualifying_order = models.ForeignKey(
+        "orders.Order", null=True, blank=True, on_delete=models.SET_NULL, related_name="product_reviews"
+    )
     name = models.CharField(max_length=120)
     rating = models.IntegerField()
+    title = models.CharField(max_length=200, blank=True, default="")
     comment = models.TextField()
+    is_verified_purchase = models.BooleanField(default=False, db_index=True)
+    is_published = models.BooleanField(default=True, db_index=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -168,10 +174,25 @@ class Review(models.Model):
     class Meta:
         db_table = "product_reviews"
         ordering = ["-created_at"]
-        unique_together = ("product", "user")  # one review per user per product
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "user"],
+                name="unique_review_per_user_product",
+            ),
+            models.CheckConstraint(
+                check=models.Q(rating__gte=1, rating__lte=5),
+                name="review_rating_between_1_and_5",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["product"]),
+            models.Index(fields=["is_published"]),
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["product", "is_published", "-created_at"]),
+        ]
 
     def __str__(self):
-        return f"{self.name} -> {self.product_id}"
+        return f"{self.name} -> {self.product_id} ({self.rating}★)"
 
 
 class ProductUploadSession(models.Model):

@@ -11,13 +11,35 @@ from .models import Product, ProductImage, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source="user_id", read_only=True)
     createdAt = serializers.DateTimeField(source="created_at", read_only=True)
     updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
+    isVerifiedPurchase = serializers.BooleanField(source="is_verified_purchase", read_only=True)
+    avatarInitial = serializers.SerializerMethodField()
+    canEdit = serializers.SerializerMethodField()
 
     class Meta:
         model = Review
-        fields = ["_id", "user", "name", "rating", "comment", "createdAt", "updatedAt"]
+        fields = [
+            "_id",
+            "name",
+            "avatarInitial",
+            "rating",
+            "title",
+            "comment",
+            "isVerifiedPurchase",
+            "createdAt",
+            "updatedAt",
+            "canEdit",
+        ]
+
+    def get_avatarInitial(self, obj):
+        return (obj.name[:1] if obj.name else "U").upper()
+
+    def get_canEdit(self, obj):
+        request = self.context.get("request")
+        if not request or not getattr(request, "user", None) or not request.user.is_authenticated:
+            return False
+        return str(request.user._id) == str(obj.user_id) or getattr(request.user, "role", None) == "admin"
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -34,7 +56,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    reviews = ReviewSerializer(many=True, read_only=True)
+    reviews = serializers.SerializerMethodField()
     primaryImage = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     originalPrice = serializers.FloatField(source="original_price")
@@ -58,6 +80,13 @@ class ProductSerializer(serializers.ModelSerializer):
             "createdAt", "updatedAt",
         ]
         read_only_fields = ["discount", "rating", "primaryImage"]
+
+    def get_reviews(self, obj):
+        if hasattr(obj, "_prefetched_objects_cache") and "reviews" in obj._prefetched_objects_cache:
+            p_reviews = [r for r in obj.reviews.all() if r.is_published]
+        else:
+            p_reviews = list(obj.reviews.filter(is_published=True).order_by("-created_at"))
+        return ReviewSerializer(p_reviews, many=True, context=self.context).data
 
     def get_deliveryCharge(self, obj):
         charge = getattr(obj, "delivery_charge", Decimal("49.00"))

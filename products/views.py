@@ -26,7 +26,8 @@ from datetime import timedelta
 from functools import reduce
 from operator import or_
 
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
 from django.db.models import Case, IntegerField, Q, Value, When
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -65,7 +66,12 @@ from .constants import (
     ACCEPTED_IMAGE_FORMATS,
 )
 from .models import Product, ProductImage, ProductUploadSession, ProductUploadItem, Review
-from .serializers import ProductSerializer, AdminProductSerializer, ProductImageSerializer
+from .serializers import (
+    ProductSerializer,
+    AdminProductSerializer,
+    ProductImageSerializer,
+    ReviewSerializer,
+)
 from .services import (
     archive_single_product,
     bulk_archive_products,
@@ -73,6 +79,13 @@ from .services import (
     restore_single_product,
     bulk_restore_products,
     bulk_restore_all_filtered,
+)
+from .review_services import (
+    check_review_eligibility,
+    create_product_review,
+    update_product_review,
+    delete_product_review,
+    get_product_reviews_summary,
 )
 
 logger = logging.getLogger(__name__)
@@ -501,27 +514,191 @@ def bulk_restore_products_view(request):
     })
 
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_review(request, product_id):
+@api_view(["GET"])
+def get_review_eligibility(request, product_id):
+    """
+    GET /api/products/<product_id>/reviews/eligibility/
+    Evaluates review eligibility for the authenticated user against this product.
+    """
+    if not request.user.is_authenticated:
+        return Response({
+            "canReview": False,
+            "reason": "AUTHENTICATION_REQUIRED",
+            "isVerifiedPurchase": False,
+            "existingReviewId": None,
+            "existingReview": None,
+        }, status=401)
+
     product = Product.objects.filter(_id=product_id).first()
     if not product:
-        return Response({"success": False, "message": "Product not found"}, status=404)
+        return Response({
+            "canReview": False,
+            "reason": "PRODUCT_NOT_FOUND",
+            "isVerifiedPurchase": False,
+            "existingReviewId": None,
+            "existingReview": None,
+        }, status=404)
 
-    if Review.objects.filter(product=product, user=request.user).exists():
-        return Response(
-            {"success": False, "message": "You have already reviewed this product."}, status=400
+    eligibility = check_review_eligibility(request.user, product)
+    existing_rev = eligibility.get("existing_review")
+
+    return Response({
+        "canReview": eligibility["can_review"],
+        "reason": eligibility["reason"],
+        "isVerifiedPurchase": eligibility["is_verified_purchase"],
+        "existingReviewId": str(existing_rev._id) if existing_rev else None,
+        "existingReview": ReviewSerializer(existing_rev, context={"request": request}).data if existing_rev else None,
+    })
+
+
+@api_view(["GET", "POST"])
+def product_reviews(request, product_id):
+    """
+    GET: List published reviews with summary and rating distribution.
+    POST: Create a verified review (auth required).
+    """
+    product = Product.objects.filter(_id=product_id).first()
+    if not product:
+        return Response({"success": False, "code": "PRODUCT_NOT_FOUND", "message": "Product not found."}, status=404)
+
+    if request.method == "GET":
+        summary = get_product_reviews_summary(product)
+        serialized_reviews = ReviewSerializer(summary["reviews"], many=True, context={"request": request}).data
+        return Response({
+            "success": True,
+            "summary": {
+                "averageRating": summary["averageRating"],
+                "reviewCount": summary["reviewCount"],
+                "distribution": summary["distribution"],
+            },
+            "results": serialized_reviews,
+        })
+
+    # POST
+    if not request.user.is_authenticated:
+        return Response({
+            "success": False,
+            "code": "AUTHENTICATION_REQUIRED",
+            "message": "Please sign in to write a review.",
+        }, status=401)
+
+    try:
+        data = request.data or {}
+        rating = data.get("rating")
+        try:
+            rating = int(rating)
+        except (TypeError, ValueError):
+            return Response({
+                "success": False,
+                "code": "INVALID_REVIEW",
+                "message": "Rating must be an integer between 1 and 5.",
+            }, status=400)
+
+        comment = data.get("comment", "")
+        title = data.get("title", "")
+
+        review = create_product_review(
+            user=request.user,
+            product=product,
+            rating=rating,
+            comment=comment,
+            title=title,
         )
 
-    Review.objects.create(
-        product=product,
-        user=request.user,
-        name=request.user.name,
-        rating=int(request.data.get("rating")),
-        comment=request.data.get("comment", ""),
-    )
-    product.recalculate_rating()
-    return Response({"success": True, "message": "Review added"}, status=201)
+        return Response({
+            "success": True,
+            "message": "Review submitted successfully.",
+            "review": ReviewSerializer(review, context={"request": request}).data,
+        }, status=201)
+
+    except IntegrityError:
+        return Response({
+            "success": False,
+            "code": "REVIEW_ALREADY_EXISTS",
+            "message": "You have already reviewed this product.",
+        }, status=409)
+    except ValidationError as ve:
+        err_dict = ve.message_dict if hasattr(ve, "message_dict") else {}
+        if "eligibility" in err_dict:
+            reason = err_dict["eligibility"][0]
+            if reason == "PURCHASE_REQUIRED":
+                return Response({"success": False, "code": "PURCHASE_REQUIRED", "message": "Only customers who purchased this product can review it."}, status=403)
+            elif reason == "ORDER_NOT_DELIVERED":
+                return Response({"success": False, "code": "ORDER_NOT_DELIVERED", "message": "You can review this product after it has been delivered."}, status=403)
+            elif reason == "PAYMENT_NOT_VERIFIED":
+                return Response({"success": False, "code": "PAYMENT_NOT_VERIFIED", "message": "Your payment has not been verified for this order."}, status=403)
+            elif reason == "PRODUCT_INACTIVE":
+                return Response({"success": False, "code": "PRODUCT_INACTIVE", "message": "This product is not active."}, status=400)
+            elif reason == "REVIEW_ALREADY_EXISTS":
+                return Response({"success": False, "code": "REVIEW_ALREADY_EXISTS", "message": "You have already reviewed this product."}, status=409)
+
+        return Response({
+            "success": False,
+            "code": "INVALID_REVIEW",
+            "message": err_dict or str(ve),
+        }, status=400)
+
+
+@api_view(["PUT", "PATCH", "DELETE"])
+@permission_classes([IsAuthenticated])
+def product_review_detail(request, product_id, review_id):
+    """
+    PUT / PATCH: Update existing review.
+    DELETE: Delete review.
+    """
+    product = Product.objects.filter(_id=product_id).first()
+    if not product:
+        return Response({"success": False, "code": "PRODUCT_NOT_FOUND", "message": "Product not found."}, status=404)
+
+    if request.method in ["PUT", "PATCH"]:
+        try:
+            data = request.data or {}
+            rating = data.get("rating")
+            if rating is not None:
+                try:
+                    rating = int(rating)
+                except (TypeError, ValueError):
+                    return Response({
+                        "success": False,
+                        "code": "INVALID_REVIEW",
+                        "message": "Rating must be an integer between 1 and 5.",
+                    }, status=400)
+
+            comment = data.get("comment", "")
+            title = data.get("title", "")
+
+            review = update_product_review(
+                user=request.user,
+                review_id=review_id,
+                rating=rating,
+                comment=comment,
+                title=title,
+            )
+
+            return Response({
+                "success": True,
+                "message": "Review updated successfully.",
+                "review": ReviewSerializer(review, context={"request": request}).data,
+            })
+        except ValidationError as ve:
+            msg = str(ve)
+            if "REVIEW_PERMISSION_DENIED" in msg:
+                return Response({"success": False, "code": "REVIEW_PERMISSION_DENIED", "message": "You cannot edit another customer's review."}, status=403)
+            if "not found" in msg.lower():
+                return Response({"success": False, "code": "REVIEW_NOT_FOUND", "message": "Review not found."}, status=404)
+            return Response({"success": False, "code": "INVALID_REVIEW", "message": ve.message_dict if hasattr(ve, "message_dict") else msg}, status=400)
+
+    # DELETE
+    try:
+        delete_product_review(user=request.user, review_id=review_id)
+        return Response({"success": True, "message": "Review deleted successfully."})
+    except ValidationError as ve:
+        msg = str(ve)
+        if "REVIEW_PERMISSION_DENIED" in msg:
+            return Response({"success": False, "code": "REVIEW_PERMISSION_DENIED", "message": "You cannot delete another customer's review."}, status=403)
+        if "not found" in msg.lower():
+            return Response({"success": False, "code": "REVIEW_NOT_FOUND", "message": "Review not found."}, status=404)
+        return Response({"success": False, "code": "INVALID_REVIEW", "message": msg}, status=400)
 
 
 # ------------------------------------------------------------------ Admin Image Management Endpoints
