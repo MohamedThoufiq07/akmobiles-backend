@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from accounts import views as accounts_views
+
 
 def health_check(request):
     return JsonResponse({
@@ -27,6 +29,7 @@ urlpatterns = [
     path("api/health/", health_check),
     path("api/health", health),
     path("api/auth", include("accounts.urls")),
+    path("api/accounts/google/", accounts_views.google_login, name="google_login"),
     path("api/products", include("products.urls")),
     path("api/products/", include("products.urls")),
     path("api/orders", include("orders.urls")),

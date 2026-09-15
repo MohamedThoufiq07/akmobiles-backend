@@ -17,12 +17,18 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework_simplejwt.tokens import AccessToken
 
 from products.models import Product
+from .google_services import (
+    GoogleAuthException,
+    resolve_google_customer,
+    verify_google_id_token,
+)
 from .models import User
 from .serializers import (
     RegisterSerializer,
@@ -156,3 +162,108 @@ def toggle_wishlist(request, product_id):
 
     wishlist_ids = list(user.wishlist.values_list("_id", flat=True))
     return Response({"success": True, "wishlist": wishlist_ids})
+
+
+import json
+
+
+class GoogleAuthRateThrottle(ScopedRateThrottle):
+    """
+    Applies 'google_link_password' (5/min) when 'password' is present in request payload,
+    and 'google_auth' (30/min) for normal credential-only verification requests.
+    """
+
+    def allow_request(self, request, view):
+        if request.method != "POST":
+            return True
+
+        has_password = False
+        try:
+            # First check request.data if already parsed
+            if hasattr(request, "data"):
+                try:
+                    data = request.data
+                    if isinstance(data, dict):
+                        has_password = bool(data.get("password"))
+                except Exception:
+                    pass
+
+            # Fallback to underlying request POST or body
+            if not has_password:
+                raw_req = getattr(request, "_request", request)
+                if hasattr(raw_req, "POST") and raw_req.POST:
+                    has_password = bool(raw_req.POST.get("password"))
+                elif hasattr(raw_req, "body") and raw_req.body:
+                    raw_body = raw_req.body
+                    if isinstance(raw_body, bytes):
+                        raw_body = raw_body.decode("utf-8")
+                    body_json = json.loads(raw_body)
+                    if isinstance(body_json, dict):
+                        has_password = bool(body_json.get("password"))
+        except Exception:
+            has_password = False
+
+        self.scope = "google_link_password" if has_password else "google_auth"
+        self.rate = self.get_rate()
+        if self.rate is None:
+            return True
+        self.num_requests, self.duration = self.parse_rate(self.rate)
+        return super(ScopedRateThrottle, self).allow_request(request, view)
+
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@throttle_classes([GoogleAuthRateThrottle])
+def google_login(request):
+    """
+    Canonical endpoint for Google customer authentication: POST /api/accounts/google/
+    Verifies the Google ID token, resolves/links customer account atomically,
+    and returns standard AK Mobiles JWT token & user payload.
+    """
+    credential = request.data.get("credential")
+    if not credential or not isinstance(credential, str) or not credential.strip():
+        return Response(
+            {
+                "success": False,
+                "code": "GOOGLE_CREDENTIAL_REQUIRED",
+                "message": "Google credential token is required.",
+            },
+            status=400,
+        )
+
+    password = request.data.get("password")
+    if password is not None and not isinstance(password, str):
+        password = str(password)
+
+    try:
+        payload = verify_google_id_token(credential)
+        user = resolve_google_customer(payload, password=password)
+        token = make_token(user)
+        return Response(
+            {
+                "success": True,
+                "message": "Signed in with Google successfully.",
+                "token": token,
+                "user": UserSerializer(user).data,
+            },
+            status=200,
+        )
+    except GoogleAuthException as exc:
+        return Response(
+            {
+                "success": False,
+                "code": exc.code,
+                "message": exc.message,
+            },
+            status=exc.status_code,
+        )
+    except Exception:
+        return Response(
+            {
+                "success": False,
+                "code": "GOOGLE_AUTH_FAILED",
+                "message": "Unable to complete Google authentication. Please try again.",
+            },
+            status=500,
+        )

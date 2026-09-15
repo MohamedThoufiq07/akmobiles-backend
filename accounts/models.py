@@ -24,7 +24,11 @@ ROLE_CHOICES = (("user", "user"), ("admin", "admin"))
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+    ROLE_USER = "user"
+    ROLE_ADMIN = "admin"
+
     _id = models.CharField(primary_key=True, max_length=24, default=generate_object_id, editable=False)
+
 
     name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
@@ -58,3 +62,34 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class SocialAccount(models.Model):
+    """
+    Federated identity mapping (Google sub -> local User).
+    Never stores Google access/refresh tokens or passwords.
+    """
+
+    _id = models.CharField(primary_key=True, max_length=24, default=generate_object_id, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="social_accounts")
+    provider = models.CharField(max_length=30, default="google")
+    provider_user_id = models.CharField(max_length=255)
+    email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "social_accounts"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "provider_user_id"],
+                name="unique_provider_user_id",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "provider"],
+                name="unique_user_provider",
+            ),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.provider}:{self.email} ({self.user_id})"

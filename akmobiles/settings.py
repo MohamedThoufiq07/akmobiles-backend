@@ -175,6 +175,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.AllowAny",
     ),
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "google_auth": "30/minute",
+        "google_link_password": "5/minute",
+    },
     # We craft every response envelope by hand, so no default pagination renderer.
     "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",
 }
@@ -226,3 +233,6 @@ SHIPROCKET_API_BASE_URL = os.getenv(
     "SHIPROCKET_API_BASE_URL",
     "https://apiv2.shiprocket.in",
 )
+
+# ---- Google OAuth ----
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
