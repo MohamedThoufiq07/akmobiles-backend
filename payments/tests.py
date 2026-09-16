@@ -246,7 +246,13 @@ class RazorpayPaymentIntegrationTests(TestCase):
         })
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.json()["status"], "captured")
+        data = res.json()
+        self.assertTrue(data["success"])
+        self.assertEqual(data["status"], "captured")
+        self.assertEqual(data["order"]["id"], order.pk)
+        self.assertEqual(data["order"]["status"], "Placed")
+        self.assertEqual(data["payment"]["status"], "Completed")
+        self.assertEqual(data["payment"]["razorpay_payment_id"], "pay_test_999")
 
         payment.refresh_from_db()
         order.refresh_from_db()
@@ -258,7 +264,81 @@ class RazorpayPaymentIntegrationTests(TestCase):
         self.product1.refresh_from_db()
         self.assertEqual(self.product1.stock, initial_stock - 1)
 
-    # 7. Webhook payment.captured transitions order to Placed
+        # Repeated verification is idempotent (stock must NOT be reduced twice)
+        res_repeat = self.client.post("/api/payments/razorpay/verify-payment/", {
+            "orderId": order._id,
+            "razorpay_order_id": "order_rzp_verify_1",
+            "razorpay_payment_id": "pay_test_999",
+            "razorpay_signature": valid_signature,
+        })
+        self.assertEqual(res_repeat.status_code, 200)
+        self.assertTrue(res_repeat.json()["success"])
+        self.assertEqual(res_repeat.json()["order"]["id"], order.pk)
+        self.product1.refresh_from_db()
+        self.assertEqual(self.product1.stock, initial_stock - 1)
+
+    def test_verify_payment_invalid_signature_rejected(self):
+        order = self._create_test_order()
+        payment = Payment.objects.create(
+            order=order,
+            user=self.user,
+            amount=Decimal("1000.00"),
+            amount_paise=100000,
+            currency="INR",
+            status="Pending",
+            razorpay_order_id="order_rzp_invalid_sig",
+        )
+
+        res = self.client.post("/api/payments/razorpay/verify-payment/", {
+            "orderId": order._id,
+            "razorpay_order_id": "order_rzp_invalid_sig",
+            "razorpay_payment_id": "pay_test_fake",
+            "razorpay_signature": "invalid_signature_hex_12345",
+        })
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.json()["success"])
+        self.assertIn("signature", res.json()["message"].lower())
+
+        payment.refresh_from_db()
+        order.refresh_from_db()
+        self.assertEqual(payment.status, "Pending")
+        self.assertEqual(order.order_status, "AwaitingPayment")
+
+    @patch("payments.views._razorpay_client")
+    def test_verify_payment_amount_currency_mismatch_rejected(self, mock_rzp_client_func):
+        mock_client = MagicMock()
+        mock_client.payment.fetch.return_value = {
+            "id": "pay_test_mismatch",
+            "order_id": "order_rzp_mismatch",
+            "amount": 50000,  # Mismatch (500 vs 1000)
+            "currency": "INR",
+            "status": "captured",
+        }
+        mock_rzp_client_func.return_value = mock_client
+
+        order = self._create_test_order()
+        Payment.objects.create(
+            order=order,
+            user=self.user,
+            amount=Decimal("1000.00"),
+            amount_paise=100000,
+            currency="INR",
+            status="Pending",
+            razorpay_order_id="order_rzp_mismatch",
+        )
+
+        body = "order_rzp_mismatch|pay_test_mismatch".encode("utf-8")
+        sig = hmac.new(settings.RAZORPAY_KEY_SECRET.encode("utf-8"), body, hashlib.sha256).hexdigest()
+
+        res = self.client.post("/api/payments/razorpay/verify-payment/", {
+            "orderId": order._id,
+            "razorpay_order_id": "order_rzp_mismatch",
+            "razorpay_payment_id": "pay_test_mismatch",
+            "razorpay_signature": sig,
+        })
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.json()["success"])
+        self.assertIn("amount", res.json()["message"].lower())
     def test_webhook_payment_captured_success(self):
         order = self._create_test_order()
         payment = Payment.objects.create(

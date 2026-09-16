@@ -198,11 +198,23 @@ def verify_payment(request):
         return Response({"success": False, "message": "Not authorized."}, status=403)
 
     if payment.status == "Completed":
+        order = payment.order
         return Response({
             "success": True,
             "status": "captured",
             "message": "Payment already verified successfully.",
-            "orderId": order_id,
+            "orderId": order.pk if order else order_id,
+            "order": {
+                "id": order.pk if order else order_id,
+                "_id": order.pk if order else order_id,
+                "order_number": getattr(order, "order_number", order.pk if order else order_id),
+                "status": order.order_status if order else "Placed",
+            },
+            "payment": {
+                "status": "Completed",
+                "razorpay_order_id": payment.razorpay_order_id or rzp_order_id,
+                "razorpay_payment_id": payment.razorpay_payment_id or rzp_payment_id,
+            }
         }, status=200)
 
     # Verify HMAC-SHA256 signature
@@ -252,10 +264,26 @@ def verify_payment(request):
         locked_order = Order.objects.select_for_update().filter(_id=locked_payment.order_id).first()
 
         if locked_payment.status == "Completed":
-            return Response({"success": True, "status": "captured", "message": "Payment already completed.", "orderId": locked_order._id})
+            return Response({
+                "success": True,
+                "status": "captured",
+                "message": "Payment already completed.",
+                "orderId": locked_order.pk,
+                "order": {
+                    "id": locked_order.pk,
+                    "_id": locked_order.pk,
+                    "order_number": getattr(locked_order, "order_number", locked_order.pk),
+                    "status": locked_order.order_status,
+                },
+                "payment": {
+                    "status": "Completed",
+                    "razorpay_order_id": locked_payment.razorpay_order_id or rzp_order_id,
+                    "razorpay_payment_id": locked_payment.razorpay_payment_id or rzp_payment_id,
+                }
+            })
 
         if rzp_status == "captured":
-            complete_payment_once(
+            locked_payment, locked_order = complete_payment_once(
                 locked_payment,
                 locked_order,
                 rzp_payment_id=rzp_payment_id,
@@ -265,7 +293,18 @@ def verify_payment(request):
                 "success": True,
                 "status": "captured",
                 "message": "Payment verified successfully.",
-                "orderId": locked_order._id,
+                "orderId": locked_order.pk,
+                "order": {
+                    "id": locked_order.pk,
+                    "_id": locked_order.pk,
+                    "order_number": getattr(locked_order, "order_number", locked_order.pk),
+                    "status": locked_order.order_status,
+                },
+                "payment": {
+                    "status": "Completed",
+                    "razorpay_order_id": rzp_order_id,
+                    "razorpay_payment_id": rzp_payment_id,
+                }
             })
 
         elif rzp_status in ["authorized", "processing"]:

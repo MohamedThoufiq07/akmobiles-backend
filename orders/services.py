@@ -167,7 +167,7 @@ def complete_payment_once(payment, order, rzp_payment_id: str = "", rzp_signatur
                 )
 
         # 3. Transition Order to Placed
-        transition_order_status(
+        order = transition_order_status(
             order,
             new_status="Placed",
             description="Order has been placed successfully after payment capture",

@@ -147,7 +147,7 @@ def order_detail(request, order_id):
         return Response({"success": False, "message": "Order not found"}, status=404)
     if order.user_id != request.user._id and request.user.role != "admin":
         return Response(
-            {"success": False, "message": "Not authorized to view this order"}, status=403
+            {"success": False, "message": "Order not found"}, status=404
         )
     data = OrderSerializer(
         order,
@@ -164,7 +164,7 @@ def order_invoice(request, order_id):
         return Response({"success": False, "message": "Order not found"}, status=404)
     if order.user_id != request.user._id and request.user.role != "admin":
         return Response(
-            {"success": False, "message": "Not authorized to view invoice for this order."}, status=403
+            {"success": False, "message": "Order not found"}, status=404
         )
 
     try:

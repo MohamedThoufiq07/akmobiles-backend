@@ -114,10 +114,10 @@ class OrderLifecycleAndInvoiceTests(TestCase):
         self.assertEqual(res.status_code, 409)
         self.assertIn("only after payment is completed", res.json()["message"])
 
-        # 2. Other user tries to access -> 403 Forbidden
+        # 2. Other user tries to access -> 404 Not Found (avoids exposing order existence)
         self.client.force_authenticate(user=self.other_user)
         res = self.client.get(f"/api/orders/{order._id}/invoice")
-        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.status_code, 404)
 
         # 3. Completed paid order -> 200 OK with PDF
         self.client.force_authenticate(user=self.user)
@@ -135,6 +135,41 @@ class OrderLifecycleAndInvoiceTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res["Content-Type"], "application/pdf")
         self.assertIn(f"attachment; filename=\"Invoice_{order._id}.pdf\"", res["Content-Disposition"])
+
+    def test_order_detail_owner_access_and_permissions(self):
+        order = Order.objects.create(
+            user=self.user,
+            order_items=[{"product": self.product._id, "name": "Smart Watch 2", "price": 73.0, "quantity": 1}],
+            shipping_address={"name": "Order User", "city": "Chennai", "postalCode": "600001", "phone": "9876543210"},
+            payment_info={"method": "Razorpay", "status": "Completed"},
+            items_price=73.0,
+            tax_price=13.14,
+            shipping_price=49.0,
+            total_price=135.14,
+            order_status="Placed",
+        )
+
+        # 1. Authenticated owner can access details
+        self.client.force_authenticate(user=self.user)
+        res = self.client.get(f"/api/orders/{order._id}")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()["order"]
+        self.assertEqual(data["_id"], order._id)
+        self.assertEqual(data["orderStatus"], "Placed")
+        self.assertEqual(len(data["orderItems"]), 1)
+        self.assertEqual(data["orderItems"][0]["name"], "Smart Watch 2")
+        self.assertEqual(data["shippingAddress"]["phone"], "9876543210")
+        self.assertEqual(data["totalPrice"], 135.14)
+
+        # 2. Other customer receives 404
+        self.client.force_authenticate(user=self.other_user)
+        res_other = self.client.get(f"/api/orders/{order._id}")
+        self.assertEqual(res_other.status_code, 404)
+
+        # 3. Unauthenticated request receives 401
+        self.client.force_authenticate(user=None)
+        res_unauth = self.client.get(f"/api/orders/{order._id}")
+        self.assertEqual(res_unauth.status_code, 401)
 
 
 class AdminOrdersFilteringTests(TestCase):
