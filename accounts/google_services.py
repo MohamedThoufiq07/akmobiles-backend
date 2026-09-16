@@ -50,21 +50,6 @@ class GoogleAuthUnverifiedEmailError(GoogleAuthException):
     status_code = 401
 
 
-class AccountLinkRequiredError(GoogleAuthException):
-    code = "ACCOUNT_LINK_REQUIRED"
-    status_code = 409
-
-
-class AccountLinkPasswordInvalidError(GoogleAuthException):
-    code = "ACCOUNT_LINK_PASSWORD_INVALID"
-    status_code = 401
-
-
-class AccountLinkNotAllowedError(GoogleAuthException):
-    code = "ACCOUNT_LINK_NOT_ALLOWED"
-    status_code = 403
-
-
 class AccountInactiveError(GoogleAuthException):
     code = "ACCOUNT_INACTIVE"
     status_code = 403
@@ -78,6 +63,33 @@ class CustomerAccountRequiredError(GoogleAuthException):
 class GoogleAccountConflictError(GoogleAuthException):
     code = "GOOGLE_ACCOUNT_CONFLICT"
     status_code = 409
+
+
+class GoogleEmailNotAuthoritativeError(GoogleAuthException):
+    code = "GOOGLE_EMAIL_NOT_AUTHORITATIVE"
+    status_code = 400
+
+
+def _is_email_authoritative(google_payload: dict, normalized_email: str) -> bool:
+    """
+    Checks if Google is authoritative for the verified email.
+    Google is authoritative if:
+      - email ends with @gmail.com and email_verified is true, OR
+      - email_verified is true and Google hd (hosted domain / Google Workspace) claim is present.
+    """
+    email_verified = google_payload.get("email_verified")
+    is_verified = email_verified is True or str(email_verified).lower() == "true"
+    if not is_verified:
+        return False
+
+    if normalized_email.endswith("@gmail.com"):
+        return True
+
+    hd = google_payload.get("hd")
+    if hd and str(hd).strip():
+        return True
+
+    return False
 
 
 def verify_google_id_token(credential: str, request_adapter=None) -> dict:
@@ -145,12 +157,11 @@ def verify_google_id_token(credential: str, request_adapter=None) -> dict:
     return payload
 
 
-def resolve_google_customer(google_payload: dict, password: str = None, link_password: str = None) -> User:
+def resolve_google_customer(google_payload: dict) -> User:
     """
-    Safely resolves or provisions an AK Mobiles customer account associated with
-    the verified Google payload. Enforces role restrictions and atomic account linking.
+    Safely resolves, auto-links, or provisions an AK Mobiles customer account associated with
+    the verified Google payload. Enforces role restrictions, email authoritativeness, and atomic transactions.
     """
-    effective_password = password or link_password
     sub = str(google_payload["sub"]).strip()
     raw_email = str(google_payload["email"]).strip()
     normalized_email = raw_email.lower()
@@ -172,7 +183,7 @@ def resolve_google_customer(google_payload: dict, password: str = None, link_pas
         # B. Check if a local User exists with the same email
         existing_user = (
             User.objects.select_for_update()
-            .filter(email=normalized_email)
+            .filter(email__iexact=normalized_email)
             .first()
         )
 
@@ -188,23 +199,13 @@ def resolve_google_customer(google_payload: dict, password: str = None, link_pas
                         "This account is linked to a different Google identity."
                     )
 
-            # Check if existing user has a usable password before requesting link password
-            if not existing_user.has_usable_password():
-                raise AccountLinkNotAllowedError(
-                    "This account cannot be linked with a password. Please sign in using your standard method."
+            # Validate whether Google is authoritative for this email before auto-linking
+            if not _is_email_authoritative(google_payload, normalized_email):
+                raise GoogleEmailNotAuthoritativeError(
+                    "This Google account cannot be automatically linked. Please sign in using your email and password, or reset your password."
                 )
 
-            # Require password verification to link existing customer account
-            if not effective_password:
-                raise AccountLinkRequiredError(
-                    "An account already exists with this email. Enter your existing password to link Google."
-                )
-
-            if not existing_user.check_password(effective_password):
-                raise AccountLinkPasswordInvalidError(
-                    "Incorrect password for linking this account. Please try again."
-                )
-
+            # Auto-link the existing customer account with Google SocialAccount
             try:
                 SocialAccount.objects.create(
                     user=existing_user,
@@ -252,10 +253,19 @@ def resolve_google_customer(google_payload: dict, password: str = None, link_pas
                 _validate_customer_access(social_account.user)
                 return social_account.user
 
-            user = User.objects.filter(email=normalized_email).first()
+            user = User.objects.filter(email__iexact=normalized_email).first()
             if user:
                 _validate_customer_access(user)
-                return user
+                if _is_email_authoritative(google_payload, normalized_email):
+                    SocialAccount.objects.get_or_create(
+                        provider="google",
+                        provider_user_id=sub,
+                        defaults={"user": user, "email": normalized_email}
+                    )
+                    return user
+                raise GoogleEmailNotAuthoritativeError(
+                    "This Google account cannot be automatically linked. Please sign in using your email and password, or reset your password."
+                )
             raise GoogleAccountConflictError("Account creation conflict occurred. Please try signing in again.")
 
 

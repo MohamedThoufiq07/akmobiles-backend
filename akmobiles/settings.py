@@ -180,7 +180,6 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_THROTTLE_RATES": {
         "google_auth": "30/minute",
-        "google_link_password": "5/minute",
     },
     # We craft every response envelope by hand, so no default pagination renderer.
     "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",

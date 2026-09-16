@@ -164,52 +164,11 @@ def toggle_wishlist(request, product_id):
     return Response({"success": True, "wishlist": wishlist_ids})
 
 
-import json
-
-
 class GoogleAuthRateThrottle(ScopedRateThrottle):
     """
-    Applies 'google_link_password' (5/min) when 'password' is present in request payload,
-    and 'google_auth' (30/min) for normal credential-only verification requests.
+    Applies 'google_auth' (30/min) for Google credential verification requests.
     """
-
-    def allow_request(self, request, view):
-        if request.method != "POST":
-            return True
-
-        has_password = False
-        try:
-            # First check request.data if already parsed
-            if hasattr(request, "data"):
-                try:
-                    data = request.data
-                    if isinstance(data, dict):
-                        has_password = bool(data.get("password"))
-                except Exception:
-                    pass
-
-            # Fallback to underlying request POST or body
-            if not has_password:
-                raw_req = getattr(request, "_request", request)
-                if hasattr(raw_req, "POST") and raw_req.POST:
-                    has_password = bool(raw_req.POST.get("password"))
-                elif hasattr(raw_req, "body") and raw_req.body:
-                    raw_body = raw_req.body
-                    if isinstance(raw_body, bytes):
-                        raw_body = raw_body.decode("utf-8")
-                    body_json = json.loads(raw_body)
-                    if isinstance(body_json, dict):
-                        has_password = bool(body_json.get("password"))
-        except Exception:
-            has_password = False
-
-        self.scope = "google_link_password" if has_password else "google_auth"
-        self.rate = self.get_rate()
-        if self.rate is None:
-            return True
-        self.num_requests, self.duration = self.parse_rate(self.rate)
-        return super(ScopedRateThrottle, self).allow_request(request, view)
-
+    scope = "google_auth"
 
 
 @api_view(["POST"])
@@ -232,13 +191,9 @@ def google_login(request):
             status=400,
         )
 
-    password = request.data.get("password")
-    if password is not None and not isinstance(password, str):
-        password = str(password)
-
     try:
         payload = verify_google_id_token(credential)
-        user = resolve_google_customer(payload, password=password)
+        user = resolve_google_customer(payload)
         token = make_token(user)
         return Response(
             {
