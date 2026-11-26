@@ -239,3 +239,15 @@ class ShiprocketClient:
 
     def track_awb(self, awb_code):
         return self._request("GET", f"/v1/external/courier/track/awb/{awb_code}")
+
+    def cancel_awb(self, awb_code):
+        """Cancel the courier assignment (stops the pickup)."""
+        return self._request(
+            "POST", "/v1/external/orders/cancel/shipment/awbs", json={"awbs": [str(awb_code)]}
+        )
+
+    def cancel_order(self, shiprocket_order_id):
+        """Cancel the Shiprocket order itself."""
+        return self._request(
+            "POST", "/v1/external/orders/cancel", json={"ids": [int(shiprocket_order_id)]}
+        )

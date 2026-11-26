@@ -103,7 +103,34 @@ def transition_order_status(order_or_id, new_status: str, description: str = "",
                 order.delivered_at = timezone.now()
 
         order.save(update_fields=["order_status", "status_history", "delivered_at", "updated_at"])
+
+        if current_status != new_status:
+            # Send the customer e-mail only after the transaction has committed,
+            # and only when the status really changed (no duplicate mails).
+            order_id = order._id
+            transaction.on_commit(lambda: _after_status_change(order_id, new_status))
         return order
+
+
+def _after_status_change(order_id, new_status):
+    """Post-commit side effects of a status change. Never raises."""
+    from django.conf import settings
+    from orders.models import Order
+    from orders.notifications import notify_order_event
+
+    try:
+        order = Order.objects.select_related("user").filter(_id=order_id).first()
+        if not order:
+            return
+        notify_order_event(order, new_status)
+
+        # Optional: create the Shiprocket shipment as soon as the order is confirmed.
+        if new_status == "Placed" and getattr(settings, "SHIPROCKET_AUTO_SHIP", False):
+            from shipping.services import auto_ship_order
+
+            auto_ship_order(order_id)
+    except Exception:
+        logger.exception("Post-status-change handling failed for order %s", order_id)
 
 
 def reduce_stock_once(payment, order):

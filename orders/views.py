@@ -13,6 +13,7 @@ Endpoints (under /api/orders/, all require auth):
 
 from datetime import timedelta
 
+from django.db import transaction
 from django.db.models import F, Sum, Count
 from django.db.models.functions import ExtractMonth, ExtractYear, ExtractDay
 from django.http import HttpResponse
@@ -27,6 +28,7 @@ from common.pricing import calculate_order_pricing
 from products.models import Product
 from .models import Order
 from .serializers import OrderSerializer
+from .cancellation import CancellationError, cancel_order, issue_refund
 from .services import transition_order_status, get_admin_orders_queryset
 
 
@@ -123,6 +125,10 @@ def _create_order(request):
                     )
             Product.objects.filter(stock__lt=0).update(stock=0)
 
+        if not is_online_payment:
+            from .services import _after_status_change
+            transaction.on_commit(lambda: _after_status_change(order._id, "Placed"))
+
         serialized = OrderSerializer(order).data
         return Response({"success": True, "order": serialized}, status=201)
     except Exception as exc:
@@ -202,12 +208,58 @@ def update_status(request, order_id):
     if not status:
         return Response({"success": False, "message": "Status is required."}, status=400)
 
+    if status == "Cancelled":
+        # Cancelling must also cancel the courier shipment, return stock and refund.
+        try:
+            updated_order, refund = cancel_order(order_id, request.user)
+        except CancellationError as e:
+            return Response({"success": False, "message": str(e)}, status=e.status)
+        return Response(
+            {"success": True, "order": OrderSerializer(updated_order).data, "refund": refund}
+        )
+
     try:
         updated_order = transition_order_status(order, status)
     except ValueError as e:
         return Response({"success": False, "message": str(e)}, status=400)
 
     return Response({"success": True, "order": OrderSerializer(updated_order).data})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def cancel_order_view(request, order_id):
+    """Owner or admin: cancel an order that has not been picked up yet (refunds if paid online)."""
+    reason = str((request.data or {}).get("reason") or "")
+    try:
+        order, refund = cancel_order(order_id, request.user, reason=reason)
+    except CancellationError as e:
+        return Response({"success": False, "message": str(e)}, status=e.status)
+    return Response({"success": True, "order": OrderSerializer(order).data, "refund": refund})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def retry_refund_view(request, order_id):
+    """Admin: retry the refund of an already-cancelled order (e.g. after a gateway error)."""
+    if not _is_admin(request):
+        return Response(
+            {"success": False, "message": "Access denied. Admin privileges required."}, status=403
+        )
+    order = Order.objects.filter(_id=order_id).first()
+    if not order:
+        return Response({"success": False, "message": "Order not found"}, status=404)
+    if order.order_status != "Cancelled":
+        return Response(
+            {"success": False, "message": "Only cancelled orders can be refunded."}, status=400
+        )
+    refund = issue_refund(order_id)
+    order.refresh_from_db()
+    ok = refund["status"] != "Failed"
+    return Response(
+        {"success": ok, "order": OrderSerializer(order).data, "refund": refund},
+        status=200 if ok else 502,
+    )
 
 
 @api_view(["GET"])

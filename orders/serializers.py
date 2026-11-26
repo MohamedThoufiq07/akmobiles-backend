@@ -31,6 +31,7 @@ class OrderSerializer(serializers.ModelSerializer):
     deliveredAt = serializers.DateTimeField(source="delivered_at")
     createdAt = serializers.DateTimeField(source="created_at")
     updatedAt = serializers.DateTimeField(source="updated_at")
+    shipment = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -38,8 +39,19 @@ class OrderSerializer(serializers.ModelSerializer):
             "_id", "user", "orderItems", "shippingAddress", "paymentInfo",
             "itemsPrice", "taxPrice", "shippingPrice", "totalPrice",
             "orderStatus", "statusHistory", "estimatedDelivery", "deliveredAt",
-            "createdAt", "updatedAt",
+            "createdAt", "updatedAt", "shipment",
         ]
+
+    def get_shipment(self, obj):
+        # None until a courier/AWB is assigned, so existing clients are unaffected.
+        if not obj.awb_code:
+            return None
+        return {
+            "awbCode": obj.awb_code,
+            "courierName": obj.courier_name,
+            "trackingUrl": obj.tracking_url,
+            "shippingStatus": obj.shipping_status,
+        }
 
     def get_user(self, obj):
         if self.context.get("populate_user"):

@@ -228,3 +228,19 @@ def apply_tracking_update(payload):
                 break
         order.refresh_from_db()
     return order
+
+
+def auto_ship_order(order_id):
+    """
+    Best-effort automatic shipment (used right after an order is confirmed).
+    Never raises: a Shiprocket problem must not affect checkout/payment. A
+    failed order simply stays without an AWB so an admin can retry it.
+    """
+    try:
+        create_shipment(order_id)
+        return True
+    except (ShipmentError, ShiprocketException) as exc:
+        logger.warning("Auto-shipment skipped for order %s: %s", order_id, exc)
+    except Exception:
+        logger.exception("Auto-shipment crashed for order %s", order_id)
+    return False
