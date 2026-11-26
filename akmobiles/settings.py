@@ -232,6 +232,13 @@ SHIPROCKET_API_BASE_URL = os.getenv(
     "SHIPROCKET_API_BASE_URL",
     "https://apiv2.shiprocket.in",
 )
+# Shared secret Shiprocket sends in the `x-api-key` header on webhook calls.
+SHIPROCKET_WEBHOOK_TOKEN = os.getenv("SHIPROCKET_WEBHOOK_TOKEN", "")
+# Default parcel (kg / cm) used until products carry their own weight/size.
+SHIPROCKET_DEFAULT_WEIGHT = float(os.getenv("SHIPROCKET_DEFAULT_WEIGHT", "0.5"))
+SHIPROCKET_DEFAULT_LENGTH = float(os.getenv("SHIPROCKET_DEFAULT_LENGTH", "20"))
+SHIPROCKET_DEFAULT_BREADTH = float(os.getenv("SHIPROCKET_DEFAULT_BREADTH", "12"))
+SHIPROCKET_DEFAULT_HEIGHT = float(os.getenv("SHIPROCKET_DEFAULT_HEIGHT", "8"))
 
 # ---- Google OAuth ----
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")

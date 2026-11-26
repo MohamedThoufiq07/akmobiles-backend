@@ -156,3 +156,86 @@ class ShiprocketClient:
                 "pickupLocation": self.pickup_location,
                 "message": "Shiprocket connection failed due to an unexpected error.",
             }
+
+    # ------------------------------------------------------------------
+    # Authenticated API calls
+    # ------------------------------------------------------------------
+    def _request(self, method, path, json=None, params=None):
+        """
+        Call a Shiprocket endpoint with the cached bearer token.
+        Retries once with a fresh token if Shiprocket answers 401.
+        Returns the parsed JSON body; raises ShiprocketException on failure.
+        """
+        url = f"{self.base_url}{path}"
+
+        for attempt in (1, 2):
+            token = self.get_token(force_refresh=(attempt == 2))
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}",
+            }
+            try:
+                response = requests.request(
+                    method, url, json=json, params=params, headers=headers, timeout=self.timeout
+                )
+            except requests.exceptions.Timeout:
+                raise ShiprocketTimeoutError("Shiprocket API connection timed out.")
+            except requests.exceptions.RequestException:
+                raise ShiprocketConnectionError("Unable to connect to Shiprocket API.")
+
+            if response.status_code == 401 and attempt == 1:
+                self.invalidate_token()
+                continue
+            break
+
+        try:
+            data = response.json()
+        except Exception:
+            data = {}
+
+        if response.status_code >= 400:
+            message = ""
+            if isinstance(data, dict):
+                message = data.get("message") or ""
+                errors = data.get("errors")
+                if errors and not message:
+                    message = str(errors)
+            logger.warning("Shiprocket %s %s failed with status %s", method, path, response.status_code)
+            raise ShiprocketException(message or f"Shiprocket API returned status {response.status_code}.")
+
+        return data
+
+    def check_serviceability(self, pickup_postcode, delivery_postcode, weight, cod=False):
+        return self._request(
+            "GET",
+            "/v1/external/courier/serviceability/",
+            params={
+                "pickup_postcode": pickup_postcode,
+                "delivery_postcode": delivery_postcode,
+                "weight": weight,
+                "cod": 1 if cod else 0,
+            },
+        )
+
+    def create_order(self, payload):
+        """POST /orders/create/adhoc — returns order_id and shipment_id."""
+        return self._request("POST", "/v1/external/orders/create/adhoc", json=payload)
+
+    def assign_awb(self, shipment_id, courier_id=None):
+        body = {"shipment_id": shipment_id}
+        if courier_id:
+            body["courier_id"] = courier_id
+        return self._request("POST", "/v1/external/courier/assign/awb", json=body)
+
+    def schedule_pickup(self, shipment_id):
+        return self._request(
+            "POST", "/v1/external/courier/generate/pickup", json={"shipment_id": [shipment_id]}
+        )
+
+    def generate_label(self, shipment_id):
+        return self._request(
+            "POST", "/v1/external/courier/generate/label", json={"shipment_id": [shipment_id]}
+        )
+
+    def track_awb(self, awb_code):
+        return self._request("GET", f"/v1/external/courier/track/awb/{awb_code}")

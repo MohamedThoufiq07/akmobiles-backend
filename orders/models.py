@@ -47,6 +47,15 @@ class Order(models.Model):
     estimated_delivery = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
 
+    # Shipping (Shiprocket) — all optional until a shipment is created.
+    shiprocket_order_id = models.CharField(max_length=50, blank=True, default="")
+    shiprocket_shipment_id = models.CharField(max_length=50, blank=True, default="")
+    awb_code = models.CharField(max_length=60, blank=True, default="", db_index=True)
+    courier_name = models.CharField(max_length=100, blank=True, default="")
+    tracking_url = models.CharField(max_length=500, blank=True, default="")
+    shipping_status = models.CharField(max_length=60, blank=True, default="")
+    shipment_created_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
